@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Window95 from './ui/Window95'
+import Leaderboard from './Leaderboard'
 
 interface Props {
   onLaunchGame: () => void
@@ -51,6 +52,9 @@ export default function Desktop({ onLaunchGame }: Props) {
   
   return (
     <div className="h-screen w-screen relative overflow-hidden select-none" style={{ background: '#008080' }}>
+      {/* Leaderboard */}
+      <Leaderboard />
+      
       {/* Desktop Icons Grid */}
       <div className="p-2 flex flex-col gap-1">
         {/* Row 1 */}

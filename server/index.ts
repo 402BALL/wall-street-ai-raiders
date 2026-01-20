@@ -91,23 +91,27 @@ setupGameEvents('crypto', gameEngines.crypto)
 io.on('connection', (socket) => {
   console.log(`[Socket] Client connected: ${socket.id}`)
   
-  // Send overview of all games
-  socket.emit('gamesOverview', {
-    classic: { 
-      isRunning: gameEngines.classic.isRunning(),
-      turnNumber: gameEngines.classic.getState().turnNumber,
-      currentDate: gameEngines.classic.getState().currentDate
-    },
-    modern: { 
-      isRunning: gameEngines.modern.isRunning(),
-      turnNumber: gameEngines.modern.getState().turnNumber,
-      currentDate: gameEngines.modern.getState().currentDate
-    },
-    crypto: { 
-      isRunning: gameEngines.crypto.isRunning(),
-      turnNumber: gameEngines.crypto.getState().turnNumber,
-      currentDate: gameEngines.crypto.getState().currentDate
+  // Send overview of all games with leaderboard data
+  const getGameOverview = (engine: GameEngine) => {
+    const state = engine.getState()
+    const sortedPlayers = [...state.players].sort((a, b) => b.netWorth - a.netWorth)
+    return {
+      isRunning: engine.isRunning(),
+      turnNumber: state.turnNumber,
+      currentDate: state.currentDate,
+      players: sortedPlayers.map(p => ({
+        name: p.name,
+        color: p.color,
+        avatar: p.avatar,
+        netWorth: p.netWorth
+      }))
     }
+  }
+  
+  socket.emit('gamesOverview', {
+    classic: getGameOverview(gameEngines.classic),
+    modern: getGameOverview(gameEngines.modern),
+    crypto: getGameOverview(gameEngines.crypto)
   })
   
   // Handle joining a specific game room
@@ -176,6 +180,31 @@ httpServer.listen(PORT, () => {
   gameEngines.classic.startGame('classic')
   gameEngines.modern.startGame('modern')
   gameEngines.crypto.startGame('crypto')
+  
+  // Broadcast leaderboard updates every 10 seconds
+  setInterval(() => {
+    const getGameOverview = (engine: GameEngine) => {
+      const state = engine.getState()
+      const sortedPlayers = [...state.players].sort((a, b) => b.netWorth - a.netWorth)
+      return {
+        isRunning: engine.isRunning(),
+        turnNumber: state.turnNumber,
+        currentDate: state.currentDate,
+        players: sortedPlayers.map(p => ({
+          name: p.name,
+          color: p.color,
+          avatar: p.avatar,
+          netWorth: p.netWorth
+        }))
+      }
+    }
+    
+    io.emit('gamesOverview', {
+      classic: getGameOverview(gameEngines.classic),
+      modern: getGameOverview(gameEngines.modern),
+      crypto: getGameOverview(gameEngines.crypto)
+    })
+  }, 10000)
   console.log('[Server] All 3 games running!')
 })
 
