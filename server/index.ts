@@ -137,9 +137,14 @@ io.on('connection', (socket) => {
     socket.emit('gameState', { mode, state: gameEngines[mode].getState() })
   })
   
-  socket.on('disconnect', () => {
+  // Ping handler to keep connection alive
+  socket.on('ping', () => {
+    socket.emit('pong')
+  })
+
+  socket.on('disconnect', (reason) => {
     socketGameMap.delete(socket.id)
-    console.log(`[Socket] Client disconnected: ${socket.id}`)
+    console.log(`[Socket] Client disconnected: ${socket.id}, reason: ${reason}`)
   })
 })
 
