@@ -172,7 +172,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       companies: serverState.companies || state.companies,
       newsHeadlines: serverState.news || state.newsHeadlines,
       currentEvent: serverState.currentEvent,
-      winner: serverState.winner,
+      winner: serverState.winner || null,
       marketName: serverState.marketName || state.marketName,
       breakingNews: serverState.breakingNews,
       isPaused: !serverState.isRunning

@@ -13,10 +13,51 @@ interface GameWindowProps {
 }
 
 export default function GameWindow({ onClose }: GameWindowProps) {
-  const { currentEvent, pauseGame, restartGame, winner } = useGameStore()
+  const { currentEvent, pauseGame, restartGame, winner, companies, players, isConnected } = useGameStore()
   const [isMinimized, setIsMinimized] = useState(false)
   const [showGameMenu, setShowGameMenu] = useState(false)
+  const [hasError, setHasError] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  
+  // Connection check - show loading if not connected
+  if (!isConnected) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center" style={{ background: '#008080' }}>
+        <div className="win95-window p-0" style={{ width: 300 }}>
+          <div className="win95-titlebar">
+            <span className="text-xs font-bold">Connecting...</span>
+          </div>
+          <div className="bg-[#c0c0c0] p-4 text-center text-black">
+            <div className="text-sm mb-2">Connecting to server...</div>
+            <div className="animate-pulse">Please wait</div>
+            <button className="win95-btn mt-4 px-4 py-1 text-xs" onClick={onClose}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  
+  // Loading check - show loading if no data yet
+  if (!companies || companies.length === 0 || !players || players.length === 0) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center" style={{ background: '#008080' }}>
+        <div className="win95-window p-0" style={{ width: 300 }}>
+          <div className="win95-titlebar">
+            <span className="text-xs font-bold">Loading Game...</span>
+          </div>
+          <div className="bg-[#c0c0c0] p-4 text-center text-black">
+            <div className="text-sm mb-2">Loading game data...</div>
+            <div className="animate-pulse">Please wait</div>
+            <button className="win95-btn mt-4 px-4 py-1 text-xs" onClick={onClose}>
+              Back to Desktop
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
   
   // Close menu when clicking outside
   useEffect(() => {
@@ -41,8 +82,8 @@ export default function GameWindow({ onClose }: GameWindowProps) {
   const handleMinimize = () => setIsMinimized(true)
   const handleRestore = () => setIsMinimized(false)
   
-  // Winner screen
-  if (winner) {
+  // Winner screen - only show if winner has valid data
+  if (winner && winner.name && winner.netWorth) {
     return (
       <div className="h-screen w-screen flex items-center justify-center" style={{ background: '#008080' }}>
         <div className="win95-window p-0" style={{ width: 500 }}>
