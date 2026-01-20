@@ -58,6 +58,14 @@ const gameEngines: Record<GameMode, GameEngine> = {
 // Track which game each socket is watching
 const socketGameMap = new Map<string, GameMode>()
 
+// Track AI wins across all games
+const aiWins: Record<string, number> = {
+  'CLAUDE 4 OPUS': 0,
+  'GPT-5 TURBO': 0,
+  'GROK 4': 0,
+  'DEEPSEEK V3': 0
+}
+
 // Setup event listeners for each game engine
 const setupGameEvents = (mode: GameMode, engine: GameEngine) => {
   engine.on('stateUpdate', (state) => {
@@ -78,6 +86,14 @@ const setupGameEvents = (mode: GameMode, engine: GameEngine) => {
   })
 
   engine.on('gameEnded', (result) => {
+    // Track the win
+    if (result && result.winner && result.winner.name) {
+      const winnerName = result.winner.name
+      if (aiWins[winnerName] !== undefined) {
+        aiWins[winnerName]++
+        console.log(`[Server] ${winnerName} wins ${mode}! Total wins: ${aiWins[winnerName]}`)
+      }
+    }
     io.to(`game-${mode}`).emit('gameEnded', { mode, result })
   })
 }
@@ -103,7 +119,8 @@ io.on('connection', (socket) => {
         name: p.name,
         color: p.color,
         avatar: p.avatar,
-        netWorth: p.netWorth
+        netWorth: p.netWorth,
+        wins: aiWins[p.name] || 0
       }))
     }
   }
@@ -183,7 +200,7 @@ httpServer.listen(PORT, () => {
   
   // Broadcast leaderboard updates every 10 seconds
   setInterval(() => {
-    const getGameOverview = (engine: GameEngine) => {
+    const getOverview = (engine: GameEngine) => {
       const state = engine.getState()
       const sortedPlayers = [...state.players].sort((a, b) => b.netWorth - a.netWorth)
       return {
@@ -194,15 +211,16 @@ httpServer.listen(PORT, () => {
           name: p.name,
           color: p.color,
           avatar: p.avatar,
-          netWorth: p.netWorth
+          netWorth: p.netWorth,
+          wins: aiWins[p.name] || 0
         }))
       }
     }
     
     io.emit('gamesOverview', {
-      classic: getGameOverview(gameEngines.classic),
-      modern: getGameOverview(gameEngines.modern),
-      crypto: getGameOverview(gameEngines.crypto)
+      classic: getOverview(gameEngines.classic),
+      modern: getOverview(gameEngines.modern),
+      crypto: getOverview(gameEngines.crypto)
     })
   }, 10000)
   console.log('[Server] All 3 games running!')

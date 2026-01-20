@@ -178,7 +178,7 @@ export default function CompanyDetailWindow({ company, onClose }: Props) {
                 {owner ? (
                   <div className="flex items-center gap-2">
                     <span style={{ color: owner.color }} className="font-bold">{owner.name}</span>
-                    <span className="text-black">owns {liveCompany.ownershipPercentage.toFixed(1)}%</span>
+                    <span className="text-black">owns {(liveCompany.ownershipPercentage ?? 0).toFixed(1)}%</span>
                   </div>
                 ) : (
                   <span className="text-[#606060]">No controlling shareholder</span>

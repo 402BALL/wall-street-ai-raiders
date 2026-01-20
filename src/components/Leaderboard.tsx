@@ -5,6 +5,7 @@ interface PlayerData {
   color: string
   avatar: string
   netWorth: number
+  wins?: number
 }
 
 interface GameOverviewData {
@@ -95,29 +96,32 @@ export default function Leaderboard() {
                         background: idx === 0 ? 'rgba(255,215,0,0.1)' : 'transparent'
                       }}
                     >
-                      <div className="flex items-center gap-2">
-                        <span 
-                          className="w-4 text-center font-mono text-xs font-bold"
-                          style={{ 
-                            color: idx === 0 ? '#ffd700' : idx === 1 ? '#c0c0c0' : idx === 2 ? '#cd7f32' : '#808080'
-                          }}
-                        >
-                          {idx + 1}
-                        </span>
-                        <span className="text-sm">{player.avatar}</span>
-                        <span 
-                          className="text-[10px] font-bold font-mono"
-                          style={{ color: player.color }}
-                        >
-                          {player.name.split(' ')[0]}
-                        </span>
-                      </div>
+                    <div className="flex items-center gap-2">
                       <span 
-                        className="text-[10px] font-mono font-bold"
-                        style={{ color: '#00ff00' }}
+                        className="w-4 text-center font-mono text-xs font-bold"
+                        style={{ 
+                          color: idx === 0 ? '#ffd700' : idx === 1 ? '#c0c0c0' : idx === 2 ? '#cd7f32' : '#808080'
+                        }}
                       >
-                        {formatMoney(player.netWorth)}
+                        {idx + 1}
                       </span>
+                      <span className="text-sm">{player.avatar}</span>
+                      <span 
+                        className="text-[10px] font-bold font-mono"
+                        style={{ color: player.color }}
+                      >
+                        {player.name.split(' ')[0]}
+                      </span>
+                      {player.wins && player.wins > 0 && (
+                        <span className="text-[9px] text-[#ffd700]">🏆{player.wins}</span>
+                      )}
+                    </div>
+                    <span 
+                      className="text-[10px] font-mono font-bold"
+                      style={{ color: '#00ff00' }}
+                    >
+                      {formatMoney(player.netWorth)}
+                    </span>
                     </div>
                   ))
                 ) : (

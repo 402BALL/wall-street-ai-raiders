@@ -253,13 +253,19 @@ export default function RetroCandlestickChart({ data, ticker, currentPrice }: Pr
     // Draw OHLC summary
     if (visibleData.length > 0) {
       const lastCandle = visibleData[visibleData.length - 1]
-      const change = lastCandle.close - lastCandle.open
-      const changePercent = (change / lastCandle.open * 100)
-      
-      ctx.font = '10px "Courier New", monospace'
-      ctx.fillStyle = change >= 0 ? colors.up : colors.down
-      const summary = `O:${lastCandle.open.toFixed(2)} H:${lastCandle.high.toFixed(2)} L:${lastCandle.low.toFixed(2)} C:${lastCandle.close.toFixed(2)} ${change >= 0 ? '+' : ''}${change.toFixed(2)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`
-      ctx.fillText(summary, 150, 14)
+      if (lastCandle && lastCandle.open != null && lastCandle.close != null) {
+        const o = lastCandle.open ?? 0
+        const h = lastCandle.high ?? 0
+        const l = lastCandle.low ?? 0
+        const c = lastCandle.close ?? 0
+        const change = c - o
+        const changePercent = o > 0 ? (change / o * 100) : 0
+        
+        ctx.font = '10px "Courier New", monospace'
+        ctx.fillStyle = change >= 0 ? colors.up : colors.down
+        const summary = `O:${o.toFixed(2)} H:${h.toFixed(2)} L:${l.toFixed(2)} C:${c.toFixed(2)} ${change >= 0 ? '+' : ''}${change.toFixed(2)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`
+        ctx.fillText(summary, 150, 14)
+      }
     }
 
     // Draw date labels

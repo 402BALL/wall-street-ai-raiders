@@ -361,13 +361,19 @@ export default function LiveCandlestickChart({ priceHistory, tradeMarkers, ticke
 
     if (visibleData.length > 0) {
       const last = visibleData[visibleData.length - 1]
-      const chg = last.close - last.open
-      const chgPct = ((chg / last.open) * 100).toFixed(2)
-      ctx.font = '10px "Courier New", monospace'
-      ctx.fillStyle = colors.textDim
-      ctx.fillText(`O:${last.open.toFixed(2)} H:${last.high.toFixed(2)} L:${last.low.toFixed(2)} C:${last.close.toFixed(2)}`, 150, 14)
-      ctx.fillStyle = chg >= 0 ? colors.up : colors.down
-      ctx.fillText(`${chg >= 0 ? '+' : ''}${chgPct}%`, 420, 14)
+      if (last && last.open != null && last.close != null) {
+        const o = last.open ?? 0
+        const h = last.high ?? 0
+        const l = last.low ?? 0
+        const c = last.close ?? 0
+        const chg = c - o
+        const chgPct = o > 0 ? ((chg / o) * 100).toFixed(2) : '0.00'
+        ctx.font = '10px "Courier New", monospace'
+        ctx.fillStyle = colors.textDim
+        ctx.fillText(`O:${o.toFixed(2)} H:${h.toFixed(2)} L:${l.toFixed(2)} C:${c.toFixed(2)}`, 150, 14)
+        ctx.fillStyle = chg >= 0 ? colors.up : colors.down
+        ctx.fillText(`${chg >= 0 ? '+' : ''}${chgPct}%`, 420, 14)
+      }
     }
 
     // Date labels
