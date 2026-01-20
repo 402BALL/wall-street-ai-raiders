@@ -6,12 +6,13 @@ const SOCKET_URL = import.meta.env.PROD
   ? window.location.origin 
   : 'http://localhost:3001'
 
+export type GameMode = 'classic' | 'modern' | 'crypto'
+
 export function useSocket() {
   const socketRef = useRef<Socket | null>(null)
-  const { setServerState, addNews, setBreakingNews, setConnected } = useGameStore()
+  const { setServerState, addNews, setBreakingNews, setConnected, setGamesOverview } = useGameStore()
 
   useEffect(() => {
-    // Connect to server
     console.log('[Socket] Connecting to:', SOCKET_URL)
     
     const socket = io(SOCKET_URL, {
@@ -26,8 +27,6 @@ export function useSocket() {
     socket.on('connect', () => {
       console.log('[Socket] Connected:', socket.id)
       setConnected(true)
-      // Request current state
-      socket.emit('requestState')
     })
 
     socket.on('disconnect', () => {
@@ -40,65 +39,69 @@ export function useSocket() {
       setConnected(false)
     })
 
+    // Games overview (all 3 games status)
+    socket.on('gamesOverview', (overview) => {
+      console.log('[Socket] Games overview:', overview)
+      setGamesOverview(overview)
+    })
+
     // Game state updates
-    socket.on('gameState', (state) => {
-      console.log('[Socket] Received game state:', state.turnNumber)
+    socket.on('gameState', ({ mode, state }) => {
+      console.log('[Socket] Game state update:', mode, state.turnNumber)
       setServerState(state)
     })
 
     // News updates
-    socket.on('news', (news) => {
-      console.log('[Socket] Received news:', news.headline)
+    socket.on('news', ({ mode, news }) => {
       addNews(news)
     })
 
     // Breaking news
-    socket.on('breakingNews', (news) => {
-      console.log('[Socket] Breaking news:', news.headline)
+    socket.on('breakingNews', ({ mode, news }) => {
       setBreakingNews(news)
     })
 
     // Trade notifications
-    socket.on('trade', (trade) => {
-      console.log('[Socket] Trade executed:', trade)
+    socket.on('trade', ({ mode, trade }) => {
+      console.log('[Socket] Trade:', mode, trade)
     })
 
     // Game ended
-    socket.on('gameEnded', (result) => {
-      console.log('[Socket] Game ended, winner:', result.winner.name)
+    socket.on('gameEnded', ({ mode, result }) => {
+      console.log('[Socket] Game ended:', mode, result.winner.name)
     })
 
-    // Game started
-    socket.on('gameStarted', ({ mode }) => {
-      console.log('[Socket] Game started in mode:', mode)
-    })
-
-    // Cleanup
     return () => {
-      console.log('[Socket] Cleaning up connection')
       socket.disconnect()
     }
-  }, [setServerState, addNews, setBreakingNews, setConnected])
+  }, [setServerState, addNews, setBreakingNews, setConnected, setGamesOverview])
 
-  // Method to select game mode
-  const selectGameMode = useCallback((mode: 'classic' | 'modern' | 'crypto') => {
+  // Join a specific game to watch
+  const joinGame = useCallback((mode: GameMode) => {
     if (socketRef.current) {
-      socketRef.current.emit('selectGameMode', mode)
+      socketRef.current.emit('joinGame', mode)
     }
   }, [])
 
-  // Method to request state refresh
-  const requestState = useCallback(() => {
+  // Leave current game (back to desktop)
+  const leaveGame = useCallback(() => {
     if (socketRef.current) {
-      socketRef.current.emit('requestState')
+      socketRef.current.emit('leaveGame')
+    }
+  }, [])
+
+  // Request state of specific game
+  const requestState = useCallback((mode: GameMode) => {
+    if (socketRef.current) {
+      socketRef.current.emit('requestState', mode)
     }
   }, [])
 
   return {
     socket: socketRef.current,
-    selectGameMode,
+    joinGame,
+    leaveGame,
     requestState,
     isConnected: socketRef.current?.connected || false
   }
 }
-

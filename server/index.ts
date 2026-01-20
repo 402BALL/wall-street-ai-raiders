@@ -3,7 +3,7 @@ import { createServer } from 'http'
 import { Server } from 'socket.io'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { GameEngine } from './gameEngine'
+import { GameEngine, GameMode } from './gameEngine'
 
 // ES Module fix for __dirname
 const __filename = fileURLToPath(import.meta.url)
@@ -28,9 +28,13 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-// API endpoint to get current game state
-app.get('/api/state', (req, res) => {
-  res.json(gameEngine.getState())
+// API endpoint to get all games state
+app.get('/api/games', (req, res) => {
+  res.json({
+    classic: gameEngines.classic.getState(),
+    modern: gameEngines.modern.getState(),
+    crypto: gameEngines.crypto.getState()
+  })
 })
 
 // Serve React app for all other routes
@@ -38,53 +42,105 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'))
 })
 
-// Game Engine instance
-const gameEngine = new GameEngine()
+// Create 3 Game Engines - one for each mode
+const gameEngines: Record<GameMode, GameEngine> = {
+  classic: new GameEngine(),
+  modern: new GameEngine(),
+  crypto: new GameEngine()
+}
+
+// Track which game each socket is watching
+const socketGameMap = new Map<string, GameMode>()
+
+// Setup event listeners for each game engine
+const setupGameEvents = (mode: GameMode, engine: GameEngine) => {
+  engine.on('stateUpdate', (state) => {
+    // Send to all sockets watching this game
+    io.to(`game-${mode}`).emit('gameState', { mode, state })
+  })
+
+  engine.on('newsUpdate', (news) => {
+    io.to(`game-${mode}`).emit('news', { mode, news })
+  })
+
+  engine.on('breakingNews', (news) => {
+    io.to(`game-${mode}`).emit('breakingNews', { mode, news })
+  })
+
+  engine.on('tradeExecuted', (trade) => {
+    io.to(`game-${mode}`).emit('trade', { mode, trade })
+  })
+
+  engine.on('gameEnded', (result) => {
+    io.to(`game-${mode}`).emit('gameEnded', { mode, result })
+  })
+}
+
+// Setup events for all games
+setupGameEvents('classic', gameEngines.classic)
+setupGameEvents('modern', gameEngines.modern)
+setupGameEvents('crypto', gameEngines.crypto)
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
   console.log(`[Socket] Client connected: ${socket.id}`)
   
-  // Send current game state to newly connected client
-  socket.emit('gameState', gameEngine.getState())
-  
-  // Handle client requesting full state
-  socket.on('requestState', () => {
-    socket.emit('gameState', gameEngine.getState())
-  })
-  
-  // Handle game mode selection (admin only in future)
-  socket.on('selectGameMode', (mode: string) => {
-    if (!gameEngine.isRunning()) {
-      gameEngine.startGame(mode as 'classic' | 'modern' | 'crypto')
-      io.emit('gameStarted', { mode })
+  // Send overview of all games
+  socket.emit('gamesOverview', {
+    classic: { 
+      isRunning: gameEngines.classic.isRunning(),
+      turnNumber: gameEngines.classic.getState().turnNumber,
+      currentDate: gameEngines.classic.getState().currentDate
+    },
+    modern: { 
+      isRunning: gameEngines.modern.isRunning(),
+      turnNumber: gameEngines.modern.getState().turnNumber,
+      currentDate: gameEngines.modern.getState().currentDate
+    },
+    crypto: { 
+      isRunning: gameEngines.crypto.isRunning(),
+      turnNumber: gameEngines.crypto.getState().turnNumber,
+      currentDate: gameEngines.crypto.getState().currentDate
     }
   })
   
+  // Handle joining a specific game room
+  socket.on('joinGame', (mode: GameMode) => {
+    // Leave previous game room if any
+    const previousGame = socketGameMap.get(socket.id)
+    if (previousGame) {
+      socket.leave(`game-${previousGame}`)
+    }
+    
+    // Join new game room
+    socket.join(`game-${mode}`)
+    socketGameMap.set(socket.id, mode)
+    
+    console.log(`[Socket] ${socket.id} joined game: ${mode}`)
+    
+    // Send current state of that game
+    socket.emit('gameState', { mode, state: gameEngines[mode].getState() })
+  })
+  
+  // Handle leaving game (back to desktop)
+  socket.on('leaveGame', () => {
+    const currentGame = socketGameMap.get(socket.id)
+    if (currentGame) {
+      socket.leave(`game-${currentGame}`)
+      socketGameMap.delete(socket.id)
+      console.log(`[Socket] ${socket.id} left game: ${currentGame}`)
+    }
+  })
+  
+  // Request state of specific game
+  socket.on('requestState', (mode: GameMode) => {
+    socket.emit('gameState', { mode, state: gameEngines[mode].getState() })
+  })
+  
   socket.on('disconnect', () => {
+    socketGameMap.delete(socket.id)
     console.log(`[Socket] Client disconnected: ${socket.id}`)
   })
-})
-
-// Broadcast game updates to all clients
-gameEngine.on('stateUpdate', (state) => {
-  io.emit('gameState', state)
-})
-
-gameEngine.on('newsUpdate', (news) => {
-  io.emit('news', news)
-})
-
-gameEngine.on('breakingNews', (news) => {
-  io.emit('breakingNews', news)
-})
-
-gameEngine.on('tradeExecuted', (trade) => {
-  io.emit('trade', trade)
-})
-
-gameEngine.on('gameEnded', (result) => {
-  io.emit('gameEnded', result)
 })
 
 // Start the server
@@ -97,16 +153,19 @@ httpServer.listen(PORT, () => {
 ║  Port: ${PORT}                                               ║
 ║  Mode: ${process.env.NODE_ENV || 'development'}                                    ║
 ╠════════════════════════════════════════════════════════════╣
-║  Endpoints:                                               ║
-║  - http://localhost:${PORT}        (Web UI)                  ║
-║  - http://localhost:${PORT}/api/health  (Health Check)       ║
-║  - ws://localhost:${PORT}          (WebSocket)               ║
+║  Games:                                                   ║
+║  - Classic (1985-2010): STARTING...                       ║
+║  - Modern (2010-2026):  STARTING...                       ║
+║  - Crypto (2009-2026):  STARTING...                       ║
 ╚════════════════════════════════════════════════════════════╝
   `)
   
-  // Don't auto-start - wait for user to select mode
-  console.log('[Server] Waiting for game mode selection...')
+  // Start all 3 games automatically
+  console.log('[Server] Starting all games...')
+  gameEngines.classic.startGame('classic')
+  gameEngines.modern.startGame('modern')
+  gameEngines.crypto.startGame('crypto')
+  console.log('[Server] All 3 games running!')
 })
 
-export { io, gameEngine }
-
+export { io, gameEngines }

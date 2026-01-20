@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useGameStore } from '../../store/gameStore'
 
 export type GameMode = 'classic' | 'modern' | 'crypto'
 
@@ -46,6 +47,18 @@ interface Props {
 export default function GameModeMenu({ onSelectMode, onClose }: Props) {
   const [selectedMode, setSelectedMode] = useState<GameMode>('classic')
   const [isMinimized, setIsMinimized] = useState(false)
+  const { gamesOverview, formatDate } = useGameStore()
+
+  const getGameStatus = (mode: GameMode) => {
+    if (!gamesOverview) return { isLive: false, date: 'Loading...' }
+    const game = gamesOverview[mode]
+    if (!game) return { isLive: false, date: 'Loading...' }
+    return {
+      isLive: game.isRunning,
+      date: formatDate(game.currentDate),
+      turn: game.turnNumber
+    }
+  }
 
   if (isMinimized) {
     return (
@@ -120,8 +133,8 @@ export default function GameModeMenu({ onSelectMode, onClose }: Props) {
               W$
             </div>
             <div>
-              <div className="text-sm font-bold text-black mb-1">Select a game mode to begin the simulation:</div>
-              <div className="text-xs text-[#404040]">4 AI competitors will trade for 25+ years. Highest net worth wins!</div>
+              <div className="text-sm font-bold text-black mb-1">Select a LIVE game to watch:</div>
+              <div className="text-xs text-[#404040]">All 3 simulations run 24/7. Pick one to spectate!</div>
             </div>
           </div>
 
@@ -133,33 +146,49 @@ export default function GameModeMenu({ onSelectMode, onClose }: Props) {
             <legend className="text-xs font-bold text-black px-1">Game Modes</legend>
             
             <div className="space-y-2">
-              {gameModes.map((mode) => (
-                <label
-                  key={mode.id}
-                  className="flex items-center gap-2 cursor-pointer hover:bg-[#000080] hover:text-white p-1 text-black"
-                  onClick={() => setSelectedMode(mode.id)}
-                >
-                  {/* Radio Button */}
-                  <div 
-                    className="w-4 h-4 rounded-full bg-white flex items-center justify-center"
-                    style={{ 
-                      border: '2px solid',
-                      borderColor: '#808080 #ffffff #ffffff #808080'
-                    }}
+              {gameModes.map((mode) => {
+                const status = getGameStatus(mode.id)
+                return (
+                  <label
+                    key={mode.id}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-[#000080] hover:text-white p-1 text-black"
+                    onClick={() => setSelectedMode(mode.id)}
                   >
-                    {selectedMode === mode.id && (
-                      <div className="w-2 h-2 rounded-full bg-black" />
-                    )}
-                  </div>
-                  
-                  {/* Icon */}
-                  <span className="font-mono text-xs w-6">{mode.icon}</span>
-                  
-                  {/* Name and Period */}
-                  <span className="text-xs font-bold">{mode.name}</span>
-                  <span className="text-xs text-[#808080]">({mode.period})</span>
-                </label>
-              ))}
+                    {/* Radio Button */}
+                    <div 
+                      className="w-4 h-4 rounded-full bg-white flex items-center justify-center"
+                      style={{ 
+                        border: '2px solid',
+                        borderColor: '#808080 #ffffff #ffffff #808080'
+                      }}
+                    >
+                      {selectedMode === mode.id && (
+                        <div className="w-2 h-2 rounded-full bg-black" />
+                      )}
+                    </div>
+                    
+                    {/* LIVE indicator */}
+                    <span 
+                      className="text-[10px] px-1 font-bold"
+                      style={{ 
+                        background: status.isLive ? '#00ff00' : '#808080',
+                        color: status.isLive ? '#000' : '#fff'
+                      }}
+                    >
+                      {status.isLive ? 'LIVE' : 'OFF'}
+                    </span>
+                    
+                    {/* Icon */}
+                    <span className="font-mono text-xs w-6">{mode.icon}</span>
+                    
+                    {/* Name and Period */}
+                    <span className="text-xs font-bold">{mode.name}</span>
+                    <span className="text-xs text-[#808080]">
+                      {status.isLive ? status.date : `(${mode.period})`}
+                    </span>
+                  </label>
+                )
+              })}
             </div>
           </fieldset>
 
@@ -221,8 +250,9 @@ export default function GameModeMenu({ onSelectMode, onClose }: Props) {
             <button
               className="win95-btn px-6 py-1 text-xs font-bold"
               onClick={() => onSelectMode(selectedMode)}
+              style={{ background: '#008000', color: 'white' }}
             >
-              OK
+              ▶ WATCH LIVE
             </button>
             <button
               className="win95-btn px-4 py-1 text-xs"

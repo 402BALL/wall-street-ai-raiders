@@ -64,12 +64,18 @@ interface GameStore extends GameState {
   marketName: string
   isConnected: boolean
   breakingNews: NewsHeadline | null
+  gamesOverview: {
+    classic: { isRunning: boolean; turnNumber: number; currentDate: GameDate }
+    modern: { isRunning: boolean; turnNumber: number; currentDate: GameDate }
+    crypto: { isRunning: boolean; turnNumber: number; currentDate: GameDate }
+  } | null
   
   // Server-related actions
   setServerState: (state: any) => void
   setConnected: (connected: boolean) => void
   addNews: (news: NewsHeadline) => void
   setBreakingNews: (news: NewsHeadline | null) => void
+  setGamesOverview: (overview: any) => void
   
   // Local actions
   startGame: (mode?: GameMode) => void
@@ -144,6 +150,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   marketName: 'DOW JONES',
   isConnected: false,
   breakingNews: null,
+  gamesOverview: null,
+  
+  // Games overview update
+  setGamesOverview: (overview) => set({ gamesOverview: overview }),
   
   // Server state update - receives full state from WebSocket
   setServerState: (serverState) => set((state) => {

@@ -6,26 +6,21 @@ import { useGameStore } from './store/gameStore'
 import { useSocket } from './hooks/useSocket'
 
 function App() {
-  const { gameStarted, isConnected } = useGameStore()
-  const { selectGameMode } = useSocket()
+  const { gameStarted } = useGameStore()
+  const { joinGame, leaveGame } = useSocket()
   const [showModeMenu, setShowModeMenu] = useState(false)
-  const [userWantsToWatch, setUserWantsToWatch] = useState(false)
+  const [watchingGame, setWatchingGame] = useState<GameMode | null>(null)
 
   const handleLaunchGame = () => {
-    // If game is already running on server, user wants to watch
-    if (isConnected && gameStarted) {
-      setUserWantsToWatch(true)
-      return
-    }
-    // Otherwise show mode selection
+    // Show mode selection to pick which game to watch
     setShowModeMenu(true)
   }
 
   const handleSelectMode = (mode: GameMode) => {
-    // Tell server to start game with selected mode
-    selectGameMode(mode)
+    // Join the selected game room
+    joinGame(mode)
+    setWatchingGame(mode)
     setShowModeMenu(false)
-    setUserWantsToWatch(true)
   }
 
   const handleCloseMenu = () => {
@@ -33,27 +28,13 @@ function App() {
   }
 
   const handleCloseGame = () => {
-    setUserWantsToWatch(false)
+    leaveGame()
+    setWatchingGame(null)
   }
-
-  // Determine what to show
-  const showGame = userWantsToWatch && gameStarted
 
   return (
     <div className="h-screen w-screen overflow-hidden">
-      {/* Connection Status Indicator */}
-      <div 
-        className="fixed top-2 right-2 z-50 px-2 py-1 text-[10px] font-mono"
-        style={{ 
-          background: isConnected ? '#008000' : '#800000',
-          color: 'white',
-          border: '1px solid #000'
-        }}
-      >
-        {isConnected ? '● LIVE' : '○ OFFLINE'}
-      </div>
-
-      {showGame ? (
+      {watchingGame ? (
         <GameWindow onClose={handleCloseGame} />
       ) : showModeMenu ? (
         <GameModeMenu onSelectMode={handleSelectMode} onClose={handleCloseMenu} />
