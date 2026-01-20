@@ -31,9 +31,7 @@ export function useSocket() {
       reconnectionAttempts: Infinity, // Keep trying forever
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      timeout: 20000,
-      pingInterval: 25000,
-      pingTimeout: 60000
+      timeout: 20000
     })
     
     globalSocket = socket
