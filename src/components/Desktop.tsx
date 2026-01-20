@@ -51,7 +51,15 @@ export default function Desktop({ onLaunchGame }: Props) {
   )
   
   return (
-    <div className="h-screen w-screen relative overflow-hidden select-none" style={{ background: '#008080' }}>
+    <div 
+      className="h-screen w-screen relative overflow-hidden select-none" 
+      style={{ 
+        backgroundImage: 'linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)), url(/wallstreet-bg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
       {/* Leaderboard */}
       <Leaderboard />
       
