@@ -16,9 +16,18 @@ export default function GameWindow({ onClose }: GameWindowProps) {
   const { currentEvent, pauseGame, restartGame, winner, companies, players, isConnected } = useGameStore()
   const [isMinimized, setIsMinimized] = useState(false)
   const [showGameMenu, setShowGameMenu] = useState(false)
-  const [hasError, setHasError] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   
+  // Close menu when clicking outside - MUST be before any early returns!
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowGameMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
   
   // Loading check - show loading if no data yet
   if (!companies || companies.length === 0 || !players || players.length === 0) {
@@ -39,17 +48,6 @@ export default function GameWindow({ onClose }: GameWindowProps) {
       </div>
     )
   }
-  
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setShowGameMenu(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
   
   const handleClose = () => {
     if (onClose) {
