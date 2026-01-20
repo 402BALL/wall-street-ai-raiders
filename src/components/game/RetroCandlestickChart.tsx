@@ -207,12 +207,16 @@ export default function RetroCandlestickChart({ data, ticker, currentPrice }: Pr
       ctx.font = '9px "Courier New", monospace'
       ctx.textAlign = 'left'
       
+      const open = crosshairData.open ?? 0
+      const close = crosshairData.close ?? 0
+      const high = crosshairData.high ?? 0
+      const low = crosshairData.low ?? 0
       const lines = [
-        `Date: ${crosshairData.date}`,
-        `O: $${crosshairData.open.toFixed(2)}`,
-        `H: $${crosshairData.high.toFixed(2)}`,
-        `L: $${crosshairData.low.toFixed(2)}`,
-        `C: $${crosshairData.close.toFixed(2)}`,
+        `Date: ${crosshairData.date || 'N/A'}`,
+        `O: $${open.toFixed(2)}`,
+        `H: $${high.toFixed(2)}`,
+        `L: $${low.toFixed(2)}`,
+        `C: $${close.toFixed(2)}`,
         `Vol: ${formatVolume(crosshairData.volume)}`
       ]
       
@@ -392,7 +396,8 @@ export default function RetroCandlestickChart({ data, ticker, currentPrice }: Pr
   )
 }
 
-function formatVolume(vol: number): string {
+function formatVolume(vol: number | undefined | null): string {
+  if (vol == null) return '0'
   if (vol >= 1_000_000) return `${(vol / 1_000_000).toFixed(1)}M`
   if (vol >= 1_000) return `${(vol / 1_000).toFixed(1)}K`
   return vol.toString()

@@ -323,17 +323,21 @@ export default function LiveCandlestickChart({ priceHistory, tradeMarkers, ticke
         ctx.fillRect(boxX, boxY, 115, 95)
         ctx.strokeRect(boxX, boxY, 115, 95)
 
-        const chg = crosshairData.close - crosshairData.open
-        const chgPct = ((chg / crosshairData.open) * 100).toFixed(2)
+        const open = crosshairData.open ?? 0
+        const close = crosshairData.close ?? 0
+        const high = crosshairData.high ?? 0
+        const low = crosshairData.low ?? 0
+        const chg = close - open
+        const chgPct = open > 0 ? ((chg / open) * 100).toFixed(2) : '0.00'
 
         ctx.font = '9px "Courier New", monospace'
         ctx.textAlign = 'left'
         const lines = [
           { text: formatDate(crosshairData.date), color: colors.text },
-          { text: `O: $${crosshairData.open.toFixed(2)}`, color: colors.text },
-          { text: `H: $${crosshairData.high.toFixed(2)}`, color: colors.text },
-          { text: `L: $${crosshairData.low.toFixed(2)}`, color: colors.text },
-          { text: `C: $${crosshairData.close.toFixed(2)}`, color: colors.text },
+          { text: `O: $${open.toFixed(2)}`, color: colors.text },
+          { text: `H: $${high.toFixed(2)}`, color: colors.text },
+          { text: `L: $${low.toFixed(2)}`, color: colors.text },
+          { text: `C: $${close.toFixed(2)}`, color: colors.text },
           { text: `${chg >= 0 ? '+' : ''}${chgPct}%`, color: chg >= 0 ? colors.up : colors.down },
           { text: `Vol: ${formatVolume(crosshairData.volume)}`, color: colors.textDim }
         ]
@@ -643,7 +647,8 @@ export default function LiveCandlestickChart({ priceHistory, tradeMarkers, ticke
   )
 }
 
-function formatVolume(vol: number): string {
+function formatVolume(vol: number | undefined | null): string {
+  if (vol == null) return '0'
   if (vol >= 1e9) return `${(vol / 1e9).toFixed(1)}B`
   if (vol >= 1e6) return `${(vol / 1e6).toFixed(1)}M`
   if (vol >= 1e3) return `${(vol / 1e3).toFixed(0)}K`
