@@ -166,192 +166,193 @@ export class GameEngine extends EventEmitter {
   }
 
   private generateCompanies(mode: GameMode): Company[] {
+    // Prices are roughly accurate for the START of each period
+    // Classic: 1985 prices, Modern: 2010 prices, Crypto: 2009-2010 prices
     const companyData = {
       classic: [
-        // Technology
-        { ticker: 'IBM', name: 'IBM Corporation', sector: 'Technology', price: 125 },
-        { ticker: 'MSFT', name: 'Microsoft Corp', sector: 'Technology', price: 2.5 },
-        { ticker: 'AAPL', name: 'Apple Computer', sector: 'Technology', price: 1.5 },
-        { ticker: 'HPQ', name: 'Hewlett-Packard', sector: 'Technology', price: 28 },
-        { ticker: 'INTC', name: 'Intel Corporation', sector: 'Technology', price: 18 },
-        { ticker: 'ORCL', name: 'Oracle Corp', sector: 'Technology', price: 12 },
-        { ticker: 'CSCO', name: 'Cisco Systems', sector: 'Technology', price: 8 },
-        { ticker: 'DELL', name: 'Dell Computer', sector: 'Technology', price: 5 },
-        // Industrial
-        { ticker: 'GE', name: 'General Electric', sector: 'Industrial', price: 45 },
-        { ticker: 'CAT', name: 'Caterpillar Inc', sector: 'Industrial', price: 38 },
-        { ticker: 'MMM', name: '3M Company', sector: 'Industrial', price: 52 },
-        { ticker: 'HON', name: 'Honeywell Intl', sector: 'Industrial', price: 42 },
-        { ticker: 'EMR', name: 'Emerson Electric', sector: 'Industrial', price: 35 },
-        { ticker: 'ITW', name: 'Illinois Tool Works', sector: 'Industrial', price: 28 },
-        // Consumer
-        { ticker: 'KO', name: 'Coca-Cola Company', sector: 'Consumer', price: 35 },
-        { ticker: 'PEP', name: 'PepsiCo Inc', sector: 'Consumer', price: 32 },
-        { ticker: 'PG', name: 'Procter & Gamble', sector: 'Consumer', price: 42 },
-        { ticker: 'MCD', name: 'McDonald\'s Corp', sector: 'Consumer', price: 25 },
-        { ticker: 'NKE', name: 'Nike Inc', sector: 'Consumer', price: 8 },
-        { ticker: 'CL', name: 'Colgate-Palmolive', sector: 'Consumer', price: 22 },
-        // Energy
-        { ticker: 'XOM', name: 'Exxon Mobil', sector: 'Energy', price: 52 },
-        { ticker: 'CVX', name: 'Chevron Corp', sector: 'Energy', price: 48 },
-        { ticker: 'COP', name: 'ConocoPhillips', sector: 'Energy', price: 35 },
-        { ticker: 'SLB', name: 'Schlumberger Ltd', sector: 'Energy', price: 28 },
-        { ticker: 'HAL', name: 'Halliburton Co', sector: 'Energy', price: 22 },
-        // Financial
-        { ticker: 'JPM', name: 'JPMorgan Chase', sector: 'Financial', price: 38 },
-        { ticker: 'BAC', name: 'Bank of America', sector: 'Financial', price: 12 },
-        { ticker: 'WFC', name: 'Wells Fargo', sector: 'Financial', price: 18 },
-        { ticker: 'C', name: 'Citigroup Inc', sector: 'Financial', price: 25 },
-        { ticker: 'GS', name: 'Goldman Sachs', sector: 'Financial', price: 85 },
-        { ticker: 'MS', name: 'Morgan Stanley', sector: 'Financial', price: 42 },
-        { ticker: 'AXP', name: 'American Express', sector: 'Financial', price: 28 },
-        // Healthcare
-        { ticker: 'JNJ', name: 'Johnson & Johnson', sector: 'Healthcare', price: 55 },
-        { ticker: 'PFE', name: 'Pfizer Inc', sector: 'Healthcare', price: 32 },
-        { ticker: 'MRK', name: 'Merck & Co', sector: 'Healthcare', price: 48 },
-        { ticker: 'ABT', name: 'Abbott Labs', sector: 'Healthcare', price: 28 },
-        { ticker: 'LLY', name: 'Eli Lilly', sector: 'Healthcare', price: 45 },
-        { ticker: 'BMY', name: 'Bristol-Myers', sector: 'Healthcare', price: 35 },
-        // Retail
-        { ticker: 'WMT', name: 'Walmart Inc', sector: 'Retail', price: 28 },
-        { ticker: 'HD', name: 'Home Depot', sector: 'Retail', price: 18 },
-        { ticker: 'TGT', name: 'Target Corp', sector: 'Retail', price: 22 },
-        { ticker: 'KR', name: 'Kroger Co', sector: 'Retail', price: 15 },
-        { ticker: 'COST', name: 'Costco Wholesale', sector: 'Retail', price: 25 },
+        // Technology - 1985 prices (split-adjusted estimates)
+        { ticker: 'IBM', name: 'IBM Corporation', sector: 'Technology', price: 120.00 },
+        { ticker: 'MSFT', name: 'Microsoft Corp', sector: 'Technology', price: 0.10 }, // IPO 1986 at ~$0.10 split-adj
+        { ticker: 'AAPL', name: 'Apple Computer', sector: 'Technology', price: 0.50 }, // ~$0.50 split-adjusted 1985
+        { ticker: 'HPQ', name: 'Hewlett-Packard', sector: 'Technology', price: 12.00 },
+        { ticker: 'INTC', name: 'Intel Corporation', sector: 'Technology', price: 1.50 }, // split-adjusted
+        { ticker: 'ORCL', name: 'Oracle Corp', sector: 'Technology', price: 0.30 }, // IPO 1986
+        { ticker: 'CSCO', name: 'Cisco Systems', sector: 'Technology', price: 0.08 }, // IPO 1990
+        { ticker: 'DELL', name: 'Dell Computer', sector: 'Technology', price: 0.05 }, // IPO 1988
+        { ticker: 'TXN', name: 'Texas Instruments', sector: 'Technology', price: 8.50 },
+        { ticker: 'MOT', name: 'Motorola Inc', sector: 'Technology', price: 15.00 },
+        // Industrial - 1985 prices
+        { ticker: 'GE', name: 'General Electric', sector: 'Industrial', price: 6.50 }, // split-adjusted
+        { ticker: 'CAT', name: 'Caterpillar Inc', sector: 'Industrial', price: 12.00 },
+        { ticker: 'MMM', name: '3M Company', sector: 'Industrial', price: 18.00 },
+        { ticker: 'HON', name: 'Honeywell Intl', sector: 'Industrial', price: 22.00 },
+        { ticker: 'EMR', name: 'Emerson Electric', sector: 'Industrial', price: 8.00 },
+        { ticker: 'UTX', name: 'United Technologies', sector: 'Industrial', price: 14.00 },
+        // Consumer - 1985 prices
+        { ticker: 'KO', name: 'Coca-Cola Company', sector: 'Consumer', price: 2.50 }, // split-adjusted
+        { ticker: 'PEP', name: 'PepsiCo Inc', sector: 'Consumer', price: 2.00 },
+        { ticker: 'PG', name: 'Procter & Gamble', sector: 'Consumer', price: 6.00 },
+        { ticker: 'MCD', name: 'McDonald\'s Corp', sector: 'Consumer', price: 3.50 },
+        { ticker: 'NKE', name: 'Nike Inc', sector: 'Consumer', price: 0.20 }, // split-adjusted
+        { ticker: 'CL', name: 'Colgate-Palmolive', sector: 'Consumer', price: 4.00 },
+        { ticker: 'KHC', name: 'Kraft Heinz', sector: 'Consumer', price: 12.00 },
+        { ticker: 'MO', name: 'Philip Morris', sector: 'Consumer', price: 3.00 },
+        // Energy - 1985 prices
+        { ticker: 'XOM', name: 'Exxon Mobil', sector: 'Energy', price: 8.50 },
+        { ticker: 'CVX', name: 'Chevron Corp', sector: 'Energy', price: 7.00 },
+        { ticker: 'COP', name: 'ConocoPhillips', sector: 'Energy', price: 5.50 },
+        { ticker: 'SLB', name: 'Schlumberger Ltd', sector: 'Energy', price: 12.00 },
+        { ticker: 'OXY', name: 'Occidental Petrol', sector: 'Energy', price: 8.00 },
+        // Financial - 1985 prices
+        { ticker: 'JPM', name: 'JPMorgan Chase', sector: 'Financial', price: 5.00 },
+        { ticker: 'BAC', name: 'Bank of America', sector: 'Financial', price: 2.00 },
+        { ticker: 'WFC', name: 'Wells Fargo', sector: 'Financial', price: 1.50 },
+        { ticker: 'C', name: 'Citigroup Inc', sector: 'Financial', price: 4.00 },
+        { ticker: 'AXP', name: 'American Express', sector: 'Financial', price: 6.00 },
+        { ticker: 'MER', name: 'Merrill Lynch', sector: 'Financial', price: 8.00 },
+        { ticker: 'LEH', name: 'Lehman Brothers', sector: 'Financial', price: 12.00 },
+        // Healthcare - 1985 prices
+        { ticker: 'JNJ', name: 'Johnson & Johnson', sector: 'Healthcare', price: 4.00 },
+        { ticker: 'PFE', name: 'Pfizer Inc', sector: 'Healthcare', price: 2.50 },
+        { ticker: 'MRK', name: 'Merck & Co', sector: 'Healthcare', price: 8.00 },
+        { ticker: 'ABT', name: 'Abbott Labs', sector: 'Healthcare', price: 5.00 },
+        { ticker: 'LLY', name: 'Eli Lilly', sector: 'Healthcare', price: 6.00 },
+        { ticker: 'BMY', name: 'Bristol-Myers', sector: 'Healthcare', price: 7.00 },
+        // Retail - 1985 prices
+        { ticker: 'WMT', name: 'Walmart Inc', sector: 'Retail', price: 1.50 }, // split-adjusted
+        { ticker: 'HD', name: 'Home Depot', sector: 'Retail', price: 0.50 }, // IPO 1981
+        { ticker: 'TGT', name: 'Target Corp', sector: 'Retail', price: 5.00 },
+        { ticker: 'COST', name: 'Costco Wholesale', sector: 'Retail', price: 5.00 }, // IPO 1985
+        { ticker: 'GPS', name: 'Gap Inc', sector: 'Retail', price: 2.00 },
         // Entertainment/Media
-        { ticker: 'DIS', name: 'Walt Disney Co', sector: 'Entertainment', price: 32 },
-        { ticker: 'TWX', name: 'Time Warner', sector: 'Media', price: 45 },
-        { ticker: 'VIA', name: 'Viacom Inc', sector: 'Media', price: 28 },
+        { ticker: 'DIS', name: 'Walt Disney Co', sector: 'Entertainment', price: 3.00 },
+        { ticker: 'TWX', name: 'Time Warner', sector: 'Media', price: 15.00 },
+        { ticker: 'CBS', name: 'CBS Corporation', sector: 'Media', price: 12.00 },
         // Telecom
-        { ticker: 'T', name: 'AT&T Inc', sector: 'Telecom', price: 22 },
-        { ticker: 'VZ', name: 'Verizon Comm', sector: 'Telecom', price: 35 },
+        { ticker: 'T', name: 'AT&T Inc', sector: 'Telecom', price: 5.00 },
         // Aerospace
-        { ticker: 'BA', name: 'Boeing Company', sector: 'Aerospace', price: 45 },
-        { ticker: 'LMT', name: 'Lockheed Martin', sector: 'Aerospace', price: 52 },
-        { ticker: 'RTN', name: 'Raytheon Co', sector: 'Aerospace', price: 38 },
-        { ticker: 'NOC', name: 'Northrop Grumman', sector: 'Aerospace', price: 42 },
+        { ticker: 'BA', name: 'Boeing Company', sector: 'Aerospace', price: 8.00 },
+        { ticker: 'LMT', name: 'Lockheed Martin', sector: 'Aerospace', price: 15.00 },
+        { ticker: 'GD', name: 'General Dynamics', sector: 'Aerospace', price: 10.00 },
+        { ticker: 'NOC', name: 'Northrop Grumman', sector: 'Aerospace', price: 12.00 },
       ],
       modern: [
-        // Big Tech
-        { ticker: 'AAPL', name: 'Apple Inc', sector: 'Technology', price: 45 },
-        { ticker: 'MSFT', name: 'Microsoft Corp', sector: 'Technology', price: 28 },
-        { ticker: 'GOOGL', name: 'Alphabet Inc', sector: 'Technology', price: 280 },
-        { ticker: 'AMZN', name: 'Amazon.com Inc', sector: 'Technology', price: 85 },
-        { ticker: 'META', name: 'Meta Platforms', sector: 'Technology', price: 38 },
-        { ticker: 'NVDA', name: 'NVIDIA Corp', sector: 'Technology', price: 15 },
-        { ticker: 'TSLA', name: 'Tesla Inc', sector: 'Automotive', price: 25 },
-        // Tech Growth
-        { ticker: 'NFLX', name: 'Netflix Inc', sector: 'Entertainment', price: 18 },
-        { ticker: 'AMD', name: 'AMD Inc', sector: 'Technology', price: 8 },
-        { ticker: 'CRM', name: 'Salesforce Inc', sector: 'Technology', price: 95 },
-        { ticker: 'ADBE', name: 'Adobe Inc', sector: 'Technology', price: 85 },
-        { ticker: 'NOW', name: 'ServiceNow', sector: 'Technology', price: 120 },
-        { ticker: 'SNOW', name: 'Snowflake Inc', sector: 'Technology', price: 110 },
-        // Fintech
-        { ticker: 'PYPL', name: 'PayPal Holdings', sector: 'Fintech', price: 45 },
-        { ticker: 'SQ', name: 'Block Inc', sector: 'Fintech', price: 15 },
-        { ticker: 'COIN', name: 'Coinbase Global', sector: 'Fintech', price: 250 },
-        { ticker: 'AFRM', name: 'Affirm Holdings', sector: 'Fintech', price: 85 },
-        { ticker: 'SOFI', name: 'SoFi Technologies', sector: 'Fintech', price: 12 },
+        // Big Tech - 2010 prices (approximately)
+        { ticker: 'AAPL', name: 'Apple Inc', sector: 'Technology', price: 9.00 }, // ~$9 split-adjusted 2010
+        { ticker: 'MSFT', name: 'Microsoft Corp', sector: 'Technology', price: 28.00 },
+        { ticker: 'GOOGL', name: 'Alphabet Inc', sector: 'Technology', price: 280.00 },
+        { ticker: 'AMZN', name: 'Amazon.com Inc', sector: 'Technology', price: 130.00 },
+        { ticker: 'META', name: 'Meta Platforms', sector: 'Technology', price: 38.00 }, // IPO 2012
+        { ticker: 'NVDA', name: 'NVIDIA Corp', sector: 'Technology', price: 3.00 }, // split-adjusted
+        { ticker: 'TSLA', name: 'Tesla Inc', sector: 'Automotive', price: 4.50 }, // IPO Jun 2010 at ~$17, split-adj ~$4
+        { ticker: 'INTC', name: 'Intel Corporation', sector: 'Technology', price: 20.00 },
+        { ticker: 'ORCL', name: 'Oracle Corp', sector: 'Technology', price: 24.00 },
+        // Tech Growth - 2010 prices
+        { ticker: 'NFLX', name: 'Netflix Inc', sector: 'Entertainment', price: 10.00 }, // split-adjusted
+        { ticker: 'AMD', name: 'AMD Inc', sector: 'Technology', price: 8.00 },
+        { ticker: 'CRM', name: 'Salesforce Inc', sector: 'Technology', price: 12.00 },
+        { ticker: 'ADBE', name: 'Adobe Inc', sector: 'Technology', price: 32.00 },
+        { ticker: 'QCOM', name: 'Qualcomm Inc', sector: 'Technology', price: 38.00 },
+        { ticker: 'AVGO', name: 'Broadcom Inc', sector: 'Technology', price: 25.00 },
+        // Fintech - various IPO dates
+        { ticker: 'PYPL', name: 'PayPal Holdings', sector: 'Fintech', price: 38.00 }, // IPO 2015
+        { ticker: 'SQ', name: 'Block Inc', sector: 'Fintech', price: 9.00 }, // IPO 2015
+        { ticker: 'COIN', name: 'Coinbase Global', sector: 'Fintech', price: 250.00 }, // IPO 2021
+        { ticker: 'V', name: 'Visa Inc', sector: 'Fintech', price: 20.00 },
+        { ticker: 'MA', name: 'Mastercard Inc', sector: 'Fintech', price: 25.00 },
         // E-commerce
-        { ticker: 'SHOP', name: 'Shopify Inc', sector: 'E-commerce', price: 28 },
-        { ticker: 'ETSY', name: 'Etsy Inc', sector: 'E-commerce', price: 55 },
-        { ticker: 'EBAY', name: 'eBay Inc', sector: 'E-commerce', price: 28 },
-        { ticker: 'WISH', name: 'ContextLogic', sector: 'E-commerce', price: 18 },
-        // Gig Economy
-        { ticker: 'UBER', name: 'Uber Technologies', sector: 'Technology', price: 28 },
-        { ticker: 'LYFT', name: 'Lyft Inc', sector: 'Technology', price: 45 },
-        { ticker: 'DASH', name: 'DoorDash Inc', sector: 'Technology', price: 120 },
-        { ticker: 'ABNB', name: 'Airbnb Inc', sector: 'Technology', price: 85 },
-        // Video/Social
-        { ticker: 'ZM', name: 'Zoom Video', sector: 'Technology', price: 35 },
-        { ticker: 'SNAP', name: 'Snap Inc', sector: 'Technology', price: 12 },
-        { ticker: 'PINS', name: 'Pinterest Inc', sector: 'Technology', price: 18 },
-        { ticker: 'TWTR', name: 'Twitter Inc', sector: 'Technology', price: 25 },
-        { ticker: 'SPOT', name: 'Spotify Tech', sector: 'Entertainment', price: 95 },
-        { ticker: 'ROKU', name: 'Roku Inc', sector: 'Entertainment', price: 45 },
+        { ticker: 'SHOP', name: 'Shopify Inc', sector: 'E-commerce', price: 28.00 }, // IPO 2015
+        { ticker: 'ETSY', name: 'Etsy Inc', sector: 'E-commerce', price: 16.00 }, // IPO 2015
+        { ticker: 'EBAY', name: 'eBay Inc', sector: 'E-commerce', price: 24.00 },
+        { ticker: 'BABA', name: 'Alibaba Group', sector: 'E-commerce', price: 68.00 }, // IPO 2014
+        { ticker: 'JD', name: 'JD.com Inc', sector: 'E-commerce', price: 20.00 },
+        // Gig Economy - IPO dates
+        { ticker: 'UBER', name: 'Uber Technologies', sector: 'Technology', price: 42.00 }, // IPO 2019
+        { ticker: 'LYFT', name: 'Lyft Inc', sector: 'Technology', price: 72.00 }, // IPO 2019
+        { ticker: 'DASH', name: 'DoorDash Inc', sector: 'Technology', price: 102.00 }, // IPO 2020
+        { ticker: 'ABNB', name: 'Airbnb Inc', sector: 'Technology', price: 68.00 }, // IPO 2020
+        // Social/Video
+        { ticker: 'ZM', name: 'Zoom Video', sector: 'Technology', price: 36.00 }, // IPO 2019
+        { ticker: 'SNAP', name: 'Snap Inc', sector: 'Technology', price: 17.00 }, // IPO 2017
+        { ticker: 'PINS', name: 'Pinterest Inc', sector: 'Technology', price: 19.00 }, // IPO 2019
+        { ticker: 'TWTR', name: 'Twitter Inc', sector: 'Technology', price: 26.00 }, // IPO 2013
+        { ticker: 'SPOT', name: 'Spotify Tech', sector: 'Entertainment', price: 132.00 }, // IPO 2018
         // Gaming
-        { ticker: 'RBLX', name: 'Roblox Corp', sector: 'Gaming', price: 65 },
-        { ticker: 'TTWO', name: 'Take-Two Interactive', sector: 'Gaming', price: 85 },
-        { ticker: 'EA', name: 'Electronic Arts', sector: 'Gaming', price: 95 },
-        { ticker: 'ATVI', name: 'Activision Blizzard', sector: 'Gaming', price: 55 },
-        // AI/Cloud
-        { ticker: 'PLTR', name: 'Palantir Tech', sector: 'Technology', price: 12 },
-        { ticker: 'AI', name: 'C3.ai Inc', sector: 'Technology', price: 45 },
-        { ticker: 'PATH', name: 'UiPath Inc', sector: 'Technology', price: 55 },
+        { ticker: 'RBLX', name: 'Roblox Corp', sector: 'Gaming', price: 45.00 }, // IPO 2021
+        { ticker: 'TTWO', name: 'Take-Two Interactive', sector: 'Gaming', price: 10.00 },
+        { ticker: 'EA', name: 'Electronic Arts', sector: 'Gaming', price: 16.00 },
+        { ticker: 'ATVI', name: 'Activision Blizzard', sector: 'Gaming', price: 11.00 },
+        // AI/Cloud - later IPOs
+        { ticker: 'PLTR', name: 'Palantir Tech', sector: 'Technology', price: 10.00 }, // IPO 2020
+        { ticker: 'SNOW', name: 'Snowflake Inc', sector: 'Technology', price: 120.00 }, // IPO 2020
         // EVs
-        { ticker: 'RIVN', name: 'Rivian Automotive', sector: 'Automotive', price: 85 },
-        { ticker: 'LCID', name: 'Lucid Group', sector: 'Automotive', price: 25 },
-        { ticker: 'NIO', name: 'NIO Inc', sector: 'Automotive', price: 8 },
-        { ticker: 'LI', name: 'Li Auto Inc', sector: 'Automotive', price: 15 },
-        // Meme Stocks
-        { ticker: 'GME', name: 'GameStop Corp', sector: 'Retail', price: 15 },
-        { ticker: 'AMC', name: 'AMC Entertainment', sector: 'Entertainment', price: 8 },
-        { ticker: 'BB', name: 'BlackBerry Ltd', sector: 'Technology', price: 5 },
+        { ticker: 'RIVN', name: 'Rivian Automotive', sector: 'Automotive', price: 78.00 }, // IPO 2021
+        { ticker: 'LCID', name: 'Lucid Group', sector: 'Automotive', price: 25.00 }, // IPO 2021
+        { ticker: 'NIO', name: 'NIO Inc', sector: 'Automotive', price: 6.00 }, // IPO 2018
+        // Meme Stocks - 2020 prices before squeeze
+        { ticker: 'GME', name: 'GameStop Corp', sector: 'Retail', price: 4.00 },
+        { ticker: 'AMC', name: 'AMC Entertainment', sector: 'Entertainment', price: 2.00 },
+        { ticker: 'BB', name: 'BlackBerry Ltd', sector: 'Technology', price: 5.00 },
         // Traditional
-        { ticker: 'DIS', name: 'Walt Disney Co', sector: 'Entertainment', price: 95 },
-        { ticker: 'NFLX', name: 'Netflix', sector: 'Entertainment', price: 280 },
-        { ticker: 'JPM', name: 'JPMorgan Chase', sector: 'Financial', price: 85 },
-        { ticker: 'V', name: 'Visa Inc', sector: 'Financial', price: 75 },
-        { ticker: 'MA', name: 'Mastercard Inc', sector: 'Financial', price: 185 },
+        { ticker: 'DIS', name: 'Walt Disney Co', sector: 'Entertainment', price: 35.00 },
+        { ticker: 'JPM', name: 'JPMorgan Chase', sector: 'Financial', price: 42.00 },
+        { ticker: 'WMT', name: 'Walmart Inc', sector: 'Retail', price: 55.00 },
+        { ticker: 'HD', name: 'Home Depot', sector: 'Retail', price: 30.00 },
       ],
       crypto: [
-        // Layer 1
-        { ticker: 'BTC', name: 'Bitcoin', sector: 'Layer 1', price: 0.01 },
-        { ticker: 'ETH', name: 'Ethereum', sector: 'Layer 1', price: 0.50 },
-        { ticker: 'SOL', name: 'Solana', sector: 'Layer 1', price: 0.50 },
-        { ticker: 'ADA', name: 'Cardano', sector: 'Layer 1', price: 0.02 },
-        { ticker: 'AVAX', name: 'Avalanche', sector: 'Layer 1', price: 3.50 },
-        { ticker: 'DOT', name: 'Polkadot', sector: 'Layer 1', price: 2.50 },
-        { ticker: 'ATOM', name: 'Cosmos', sector: 'Layer 1', price: 5.00 },
-        { ticker: 'NEAR', name: 'NEAR Protocol', sector: 'Layer 1', price: 1.50 },
-        { ticker: 'FTM', name: 'Fantom', sector: 'Layer 1', price: 0.15 },
-        { ticker: 'ALGO', name: 'Algorand', sector: 'Layer 1', price: 0.25 },
-        // Old School
-        { ticker: 'XRP', name: 'Ripple', sector: 'Payments', price: 0.005 },
-        { ticker: 'LTC', name: 'Litecoin', sector: 'Payments', price: 0.01 },
-        { ticker: 'BCH', name: 'Bitcoin Cash', sector: 'Payments', price: 50 },
-        { ticker: 'XLM', name: 'Stellar Lumens', sector: 'Payments', price: 0.01 },
-        { ticker: 'XMR', name: 'Monero', sector: 'Privacy', price: 45 },
-        { ticker: 'ZEC', name: 'Zcash', sector: 'Privacy', price: 35 },
-        // Meme Coins
-        { ticker: 'DOGE', name: 'Dogecoin', sector: 'Meme', price: 0.0001 },
-        { ticker: 'SHIB', name: 'Shiba Inu', sector: 'Meme', price: 0.000001 },
-        { ticker: 'PEPE', name: 'Pepe Coin', sector: 'Meme', price: 0.0000001 },
-        { ticker: 'FLOKI', name: 'Floki Inu', sector: 'Meme', price: 0.00001 },
-        { ticker: 'BONK', name: 'Bonk', sector: 'Meme', price: 0.0000001 },
-        { ticker: 'WIF', name: 'dogwifhat', sector: 'Meme', price: 0.05 },
-        // DeFi
-        { ticker: 'UNI', name: 'Uniswap', sector: 'DeFi', price: 3.00 },
-        { ticker: 'AAVE', name: 'Aave', sector: 'DeFi', price: 85 },
-        { ticker: 'MKR', name: 'Maker', sector: 'DeFi', price: 450 },
-        { ticker: 'COMP', name: 'Compound', sector: 'DeFi', price: 125 },
-        { ticker: 'CRV', name: 'Curve DAO', sector: 'DeFi', price: 1.50 },
-        { ticker: 'SNX', name: 'Synthetix', sector: 'DeFi', price: 3.50 },
-        { ticker: 'SUSHI', name: 'SushiSwap', sector: 'DeFi', price: 2.00 },
-        { ticker: '1INCH', name: '1inch Network', sector: 'DeFi', price: 1.25 },
+        // Layer 1 - approximate launch/early prices
+        { ticker: 'BTC', name: 'Bitcoin', sector: 'Layer 1', price: 0.003 }, // 2009-2010 basically $0
+        { ticker: 'ETH', name: 'Ethereum', sector: 'Layer 1', price: 0.30 }, // ICO 2014 ~$0.30
+        { ticker: 'SOL', name: 'Solana', sector: 'Layer 1', price: 0.22 }, // Launch 2020 ~$0.22
+        { ticker: 'ADA', name: 'Cardano', sector: 'Layer 1', price: 0.02 }, // ICO 2017 ~$0.02
+        { ticker: 'AVAX', name: 'Avalanche', sector: 'Layer 1', price: 4.00 }, // Launch 2020
+        { ticker: 'DOT', name: 'Polkadot', sector: 'Layer 1', price: 2.90 }, // Launch 2020
+        { ticker: 'ATOM', name: 'Cosmos', sector: 'Layer 1', price: 1.00 }, // ICO 2017
+        { ticker: 'NEAR', name: 'NEAR Protocol', sector: 'Layer 1', price: 0.60 },
+        { ticker: 'FTM', name: 'Fantom', sector: 'Layer 1', price: 0.02 },
+        { ticker: 'ALGO', name: 'Algorand', sector: 'Layer 1', price: 2.40 }, // Launch 2019
+        // Old School - early prices
+        { ticker: 'XRP', name: 'Ripple', sector: 'Payments', price: 0.005 }, // 2013 launch
+        { ticker: 'LTC', name: 'Litecoin', sector: 'Payments', price: 0.05 }, // 2011 launch
+        { ticker: 'BCH', name: 'Bitcoin Cash', sector: 'Payments', price: 280.00 }, // Fork 2017
+        { ticker: 'XLM', name: 'Stellar Lumens', sector: 'Payments', price: 0.002 }, // 2014
+        { ticker: 'XMR', name: 'Monero', sector: 'Privacy', price: 0.50 }, // 2014
+        { ticker: 'ETC', name: 'Ethereum Classic', sector: 'Layer 1', price: 0.80 }, // Fork 2016
+        // Meme Coins - launch prices
+        { ticker: 'DOGE', name: 'Dogecoin', sector: 'Meme', price: 0.0002 }, // 2013
+        { ticker: 'SHIB', name: 'Shiba Inu', sector: 'Meme', price: 0.0000000001 }, // 2020
+        { ticker: 'PEPE', name: 'Pepe Coin', sector: 'Meme', price: 0.0000001 }, // 2023
+        { ticker: 'FLOKI', name: 'Floki Inu', sector: 'Meme', price: 0.00001 }, // 2021
+        { ticker: 'BONK', name: 'Bonk', sector: 'Meme', price: 0.0000001 }, // 2022
+        { ticker: 'WIF', name: 'dogwifhat', sector: 'Meme', price: 0.005 }, // 2023
+        // DeFi - launch prices
+        { ticker: 'UNI', name: 'Uniswap', sector: 'DeFi', price: 3.00 }, // 2020
+        { ticker: 'AAVE', name: 'Aave', sector: 'DeFi', price: 55.00 }, // 2020
+        { ticker: 'MKR', name: 'Maker', sector: 'DeFi', price: 300.00 }, // 2017
+        { ticker: 'COMP', name: 'Compound', sector: 'DeFi', price: 60.00 }, // 2020
+        { ticker: 'CRV', name: 'Curve DAO', sector: 'DeFi', price: 1.00 }, // 2020
+        { ticker: 'SNX', name: 'Synthetix', sector: 'DeFi', price: 0.50 }, // 2018
+        { ticker: 'SUSHI', name: 'SushiSwap', sector: 'DeFi', price: 1.20 }, // 2020
+        { ticker: 'YFI', name: 'yearn.finance', sector: 'DeFi', price: 3000.00 }, // 2020, started high
         // Layer 2
-        { ticker: 'MATIC', name: 'Polygon', sector: 'Layer 2', price: 0.01 },
-        { ticker: 'ARB', name: 'Arbitrum', sector: 'Layer 2', price: 0.85 },
-        { ticker: 'OP', name: 'Optimism', sector: 'Layer 2', price: 0.95 },
-        { ticker: 'IMX', name: 'Immutable X', sector: 'Layer 2', price: 0.45 },
+        { ticker: 'MATIC', name: 'Polygon', sector: 'Layer 2', price: 0.004 }, // 2019
+        { ticker: 'ARB', name: 'Arbitrum', sector: 'Layer 2', price: 1.20 }, // 2023
+        { ticker: 'OP', name: 'Optimism', sector: 'Layer 2', price: 1.40 }, // 2022
         // Oracle/Infra
-        { ticker: 'LINK', name: 'Chainlink', sector: 'Oracle', price: 0.15 },
-        { ticker: 'GRT', name: 'The Graph', sector: 'Infra', price: 0.12 },
-        { ticker: 'FIL', name: 'Filecoin', sector: 'Storage', price: 5.00 },
-        { ticker: 'AR', name: 'Arweave', sector: 'Storage', price: 8.50 },
-        // Exchange
-        { ticker: 'BNB', name: 'Binance Coin', sector: 'Exchange', price: 0.10 },
-        { ticker: 'FTT', name: 'FTX Token', sector: 'Exchange', price: 1.00 },
-        { ticker: 'CRO', name: 'Cronos', sector: 'Exchange', price: 0.05 },
-        { ticker: 'OKB', name: 'OKB', sector: 'Exchange', price: 2.50 },
+        { ticker: 'LINK', name: 'Chainlink', sector: 'Oracle', price: 0.11 }, // ICO 2017
+        { ticker: 'GRT', name: 'The Graph', sector: 'Infra', price: 0.03 }, // 2020
+        { ticker: 'FIL', name: 'Filecoin', sector: 'Storage', price: 20.00 }, // 2020
+        // Exchange - launch prices
+        { ticker: 'BNB', name: 'Binance Coin', sector: 'Exchange', price: 0.11 }, // ICO 2017
+        { ticker: 'FTT', name: 'FTX Token', sector: 'Exchange', price: 1.00 }, // 2019, will crash to 0
+        { ticker: 'CRO', name: 'Cronos', sector: 'Exchange', price: 0.02 }, // 2018
         // Gaming/NFT
-        { ticker: 'AXS', name: 'Axie Infinity', sector: 'Gaming', price: 0.50 },
-        { ticker: 'SAND', name: 'The Sandbox', sector: 'Gaming', price: 0.25 },
-        { ticker: 'MANA', name: 'Decentraland', sector: 'Gaming', price: 0.35 },
-        { ticker: 'ENJ', name: 'Enjin Coin', sector: 'Gaming', price: 0.15 },
-        { ticker: 'GALA', name: 'Gala Games', sector: 'Gaming', price: 0.02 },
-        { ticker: 'APE', name: 'ApeCoin', sector: 'NFT', price: 4.50 },
+        { ticker: 'AXS', name: 'Axie Infinity', sector: 'Gaming', price: 0.15 }, // 2020
+        { ticker: 'SAND', name: 'The Sandbox', sector: 'Gaming', price: 0.05 }, // 2020
+        { ticker: 'MANA', name: 'Decentraland', sector: 'Gaming', price: 0.02 }, // 2017
+        { ticker: 'ENJ', name: 'Enjin Coin', sector: 'Gaming', price: 0.02 }, // 2017
+        { ticker: 'GALA', name: 'Gala Games', sector: 'Gaming', price: 0.001 }, // 2020
+        { ticker: 'APE', name: 'ApeCoin', sector: 'NFT', price: 8.00 }, // 2022
       ]
     }
 
