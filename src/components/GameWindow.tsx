@@ -8,7 +8,11 @@ import AIThinkingPanel from './game/AIThinkingPanel'
 import ControlPanel from './game/ControlPanel'
 import BreakingNewsPopup from './game/BreakingNewsPopup'
 
-export default function GameWindow() {
+interface GameWindowProps {
+  onClose?: () => void
+}
+
+export default function GameWindow({ onClose }: GameWindowProps) {
   const { currentEvent, pauseGame, restartGame, winner } = useGameStore()
   const [isMinimized, setIsMinimized] = useState(false)
   const [showGameMenu, setShowGameMenu] = useState(false)
@@ -26,8 +30,12 @@ export default function GameWindow() {
   }, [])
   
   const handleClose = () => {
-    pauseGame()
-    useGameStore.setState({ gameStarted: false })
+    if (onClose) {
+      onClose()
+    } else {
+      pauseGame()
+      useGameStore.setState({ gameStarted: false })
+    }
   }
   
   const handleMinimize = () => setIsMinimized(true)

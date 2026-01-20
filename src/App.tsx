@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Desktop from './components/Desktop'
 import GameWindow from './components/GameWindow'
 import GameModeMenu, { GameMode } from './components/game/GameModeMenu'
@@ -9,12 +9,15 @@ function App() {
   const { gameStarted, isConnected } = useGameStore()
   const { selectGameMode } = useSocket()
   const [showModeMenu, setShowModeMenu] = useState(false)
+  const [userWantsToWatch, setUserWantsToWatch] = useState(false)
 
   const handleLaunchGame = () => {
-    // If already connected and game is running, just show the game
+    // If game is already running on server, user wants to watch
     if (isConnected && gameStarted) {
+      setUserWantsToWatch(true)
       return
     }
+    // Otherwise show mode selection
     setShowModeMenu(true)
   }
 
@@ -22,18 +25,19 @@ function App() {
     // Tell server to start game with selected mode
     selectGameMode(mode)
     setShowModeMenu(false)
+    setUserWantsToWatch(true)
   }
 
   const handleCloseMenu = () => {
     setShowModeMenu(false)
   }
 
-  // Auto-show game window when connected and game is running
-  useEffect(() => {
-    if (isConnected && gameStarted) {
-      setShowModeMenu(false)
-    }
-  }, [isConnected, gameStarted])
+  const handleCloseGame = () => {
+    setUserWantsToWatch(false)
+  }
+
+  // Determine what to show
+  const showGame = userWantsToWatch && gameStarted
 
   return (
     <div className="h-screen w-screen overflow-hidden">
@@ -49,8 +53,8 @@ function App() {
         {isConnected ? '● LIVE' : '○ OFFLINE'}
       </div>
 
-      {gameStarted ? (
-        <GameWindow />
+      {showGame ? (
+        <GameWindow onClose={handleCloseGame} />
       ) : showModeMenu ? (
         <GameModeMenu onSelectMode={handleSelectMode} onClose={handleCloseMenu} />
       ) : (

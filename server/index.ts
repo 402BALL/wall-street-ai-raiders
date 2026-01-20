@@ -104,9 +104,8 @@ httpServer.listen(PORT, () => {
 ╚════════════════════════════════════════════════════════════╝
   `)
   
-  // Auto-start game in classic mode (or load saved state)
-  console.log('[Server] Starting game automatically...')
-  gameEngine.startGame('classic')
+  // Don't auto-start - wait for user to select mode
+  console.log('[Server] Waiting for game mode selection...')
 })
 
 export { io, gameEngine }
