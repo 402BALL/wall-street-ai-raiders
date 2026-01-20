@@ -1,0 +1,1236 @@
+import { Company, Sector } from '../types'
+
+// Real historical company data circa 1985-1995
+interface CompanyTemplate {
+  name: string
+  ticker: string
+  sector: Sector
+  basePrice: number
+  volatility: number
+  peRatio: number
+  dividendYield: number
+  // Real historical data
+  founded: number
+  ceo: string // CEO in that era
+  headquarters: string
+  employees: number // Approximate for that period
+  revenue: number // In millions, approximate for 1990
+  profit: number // Net income in millions
+  cash: number // In millions
+  debt: number // Long-term debt in millions
+  sharesOutstanding: number // In millions
+  description: string
+}
+
+const COMPANY_TEMPLATES: CompanyTemplate[] = [
+  // ============ TECHNOLOGY ============
+  { 
+    name: 'INTERNATIONAL BUSINESS MACHINES', 
+    ticker: 'IBM', 
+    sector: 'Technology', 
+    basePrice: 108.00, 
+    volatility: 2.5, 
+    peRatio: 11, 
+    dividendYield: 4.8,
+    founded: 1911,
+    ceo: 'John F. Akers',
+    headquarters: 'Armonk, NY',
+    employees: 373_816,
+    revenue: 69_018,
+    profit: 6_020,
+    cash: 5_382,
+    debt: 11_943,
+    sharesOutstanding: 571,
+    description: 'World\'s largest computer company. Manufactures mainframes, personal computers, and provides information technology services.'
+  },
+  { 
+    name: 'DIGITAL EQUIPMENT CORP', 
+    ticker: 'DEC', 
+    sector: 'Technology', 
+    basePrice: 75.25, 
+    volatility: 3.5, 
+    peRatio: 15, 
+    dividendYield: 0,
+    founded: 1957,
+    ceo: 'Kenneth H. Olsen',
+    headquarters: 'Maynard, MA',
+    employees: 124_000,
+    revenue: 14_371,
+    profit: 1_305,
+    cash: 2_100,
+    debt: 890,
+    sharesOutstanding: 127,
+    description: 'Second-largest computer company. Pioneer in minicomputers with VAX and PDP product lines.'
+  },
+  { 
+    name: 'HEWLETT-PACKARD CO', 
+    ticker: 'HWP', 
+    sector: 'Technology', 
+    basePrice: 35.50, 
+    volatility: 3.0, 
+    peRatio: 17, 
+    dividendYield: 1.2,
+    founded: 1939,
+    ceo: 'John A. Young',
+    headquarters: 'Palo Alto, CA',
+    employees: 95_000,
+    revenue: 13_233,
+    profit: 739,
+    cash: 1_850,
+    debt: 425,
+    sharesOutstanding: 250,
+    description: 'Major manufacturer of computers, printers, scientific instruments, and electronic test equipment.'
+  },
+  { 
+    name: 'APPLE COMPUTER INC', 
+    ticker: 'AAPL', 
+    sector: 'Technology', 
+    basePrice: 6.50, 
+    volatility: 5.8, 
+    peRatio: 18, 
+    dividendYield: 0,
+    founded: 1976,
+    ceo: 'John Sculley',
+    headquarters: 'Cupertino, CA',
+    employees: 14_517,
+    revenue: 5_558,
+    profit: 475,
+    cash: 997,
+    debt: 0,
+    sharesOutstanding: 118,
+    description: 'Personal computer manufacturer. Known for Macintosh computers and innovative graphical user interfaces.'
+  },
+  { 
+    name: 'MICROSOFT CORPORATION', 
+    ticker: 'MSFT', 
+    sector: 'Technology', 
+    basePrice: 2.25, 
+    volatility: 6.2, 
+    peRatio: 35, 
+    dividendYield: 0,
+    founded: 1975,
+    ceo: 'William H. Gates III',
+    headquarters: 'Redmond, WA',
+    employees: 5_635,
+    revenue: 1_843,
+    profit: 398,
+    cash: 589,
+    debt: 0,
+    sharesOutstanding: 119,
+    description: 'Software company. Market leader in MS-DOS and Windows operating systems, Microsoft Office suite.'
+  },
+  { 
+    name: 'INTEL CORPORATION', 
+    ticker: 'INTC', 
+    sector: 'Technology', 
+    basePrice: 7.25, 
+    volatility: 4.8, 
+    peRatio: 22, 
+    dividendYield: 0.3,
+    founded: 1968,
+    ceo: 'Andrew S. Grove',
+    headquarters: 'Santa Clara, CA',
+    employees: 29_900,
+    revenue: 4_779,
+    profit: 650,
+    cash: 1_723,
+    debt: 345,
+    sharesOutstanding: 416,
+    description: 'World\'s largest semiconductor manufacturer. Dominates microprocessor market with 80386 and 80486 chips.'
+  },
+
+  // ============ FINANCE ============
+  { 
+    name: 'CITICORP', 
+    ticker: 'CCI', 
+    sector: 'Finance', 
+    basePrice: 28.75, 
+    volatility: 3.2, 
+    peRatio: 7, 
+    dividendYield: 5.8,
+    founded: 1812,
+    ceo: 'John S. Reed',
+    headquarters: 'New York, NY',
+    employees: 95_000,
+    revenue: 32_432,
+    profit: 458,
+    cash: 15_600,
+    debt: 125_000,
+    sharesOutstanding: 416,
+    description: 'Largest bank holding company in the United States. Global leader in credit cards and consumer banking.'
+  },
+  { 
+    name: 'BANK OF AMERICA CORP', 
+    ticker: 'BAC', 
+    sector: 'Finance', 
+    basePrice: 19.25, 
+    volatility: 3.0, 
+    peRatio: 8, 
+    dividendYield: 6.2,
+    founded: 1904,
+    ceo: 'Richard M. Rosenberg',
+    headquarters: 'San Francisco, CA',
+    employees: 56_000,
+    revenue: 18_543,
+    profit: 1_180,
+    cash: 8_200,
+    debt: 45_000,
+    sharesOutstanding: 318,
+    description: 'Major commercial bank. One of the largest banks in California with extensive West Coast operations.'
+  },
+  { 
+    name: 'CHASE MANHATTAN CORP', 
+    ticker: 'CMB', 
+    sector: 'Finance', 
+    basePrice: 26.50, 
+    volatility: 2.8, 
+    peRatio: 9, 
+    dividendYield: 5.5,
+    founded: 1799,
+    ceo: 'Thomas G. Labrecque',
+    headquarters: 'New York, NY',
+    employees: 42_000,
+    revenue: 16_875,
+    profit: 665,
+    cash: 7_800,
+    debt: 52_000,
+    sharesOutstanding: 254,
+    description: 'Major money center bank. Significant player in corporate lending and international banking.'
+  },
+  { 
+    name: 'MERRILL LYNCH & CO', 
+    ticker: 'MER', 
+    sector: 'Finance', 
+    basePrice: 22.50, 
+    volatility: 4.2, 
+    peRatio: 12, 
+    dividendYield: 2.8,
+    founded: 1914,
+    ceo: 'William A. Schreyer',
+    headquarters: 'New York, NY',
+    employees: 44_700,
+    revenue: 11_456,
+    profit: 436,
+    cash: 2_340,
+    debt: 28_000,
+    sharesOutstanding: 166,
+    description: 'Largest securities firm in the United States. Leader in retail brokerage and investment banking.'
+  },
+  { 
+    name: 'DREXEL BURNHAM LAMBERT', 
+    ticker: 'DBL', 
+    sector: 'Finance', 
+    basePrice: 42.00, 
+    volatility: 6.5, 
+    peRatio: 8, 
+    dividendYield: 1.2,
+    founded: 1935,
+    ceo: 'Frederick H. Joseph',
+    headquarters: 'New York, NY',
+    employees: 10_500,
+    revenue: 4_568,
+    profit: 545,
+    cash: 890,
+    debt: 2_100,
+    sharesOutstanding: 45,
+    description: 'Investment bank known for junk bond financing. Leader in leveraged buyouts and hostile takeovers.'
+  },
+
+  // ============ HEALTHCARE ============
+  { 
+    name: 'JOHNSON & JOHNSON', 
+    ticker: 'JNJ', 
+    sector: 'Healthcare', 
+    basePrice: 18.25, 
+    volatility: 1.8, 
+    peRatio: 16, 
+    dividendYield: 2.8,
+    founded: 1886,
+    ceo: 'Ralph S. Larsen',
+    headquarters: 'New Brunswick, NJ',
+    employees: 82_700,
+    revenue: 11_232,
+    profit: 1_143,
+    cash: 1_456,
+    debt: 1_089,
+    sharesOutstanding: 664,
+    description: 'Diversified healthcare company. Manufactures consumer products, pharmaceuticals, and medical devices.'
+  },
+  { 
+    name: 'PFIZER INC', 
+    ticker: 'PFE', 
+    sector: 'Healthcare', 
+    basePrice: 8.75, 
+    volatility: 2.2, 
+    peRatio: 14, 
+    dividendYield: 3.5,
+    founded: 1849,
+    ceo: 'Edmund T. Pratt Jr.',
+    headquarters: 'New York, NY',
+    employees: 40_000,
+    revenue: 6_950,
+    profit: 722,
+    cash: 978,
+    debt: 1_245,
+    sharesOutstanding: 336,
+    description: 'Major pharmaceutical company. Known for antibiotics and cardiovascular drugs including Procardia.'
+  },
+  { 
+    name: 'MERCK & CO INC', 
+    ticker: 'MRK', 
+    sector: 'Healthcare', 
+    basePrice: 28.50, 
+    volatility: 2.0, 
+    peRatio: 18, 
+    dividendYield: 2.5,
+    founded: 1891,
+    ceo: 'P. Roy Vagelos',
+    headquarters: 'Whitehouse Station, NJ',
+    employees: 37_700,
+    revenue: 7_671,
+    profit: 1_495,
+    cash: 1_123,
+    debt: 890,
+    sharesOutstanding: 384,
+    description: 'Leading pharmaceutical company. Known for Vasotec, Mevacor cholesterol drug, and vaccines.'
+  },
+  { 
+    name: 'ELI LILLY & CO', 
+    ticker: 'LLY', 
+    sector: 'Healthcare', 
+    basePrice: 22.75, 
+    volatility: 2.3, 
+    peRatio: 15, 
+    dividendYield: 3.0,
+    founded: 1876,
+    ceo: 'Vaughn D. Bryson',
+    headquarters: 'Indianapolis, IN',
+    employees: 29_100,
+    revenue: 5_192,
+    profit: 940,
+    cash: 567,
+    debt: 678,
+    sharesOutstanding: 288,
+    description: 'Major pharmaceutical company. Known for Prozac antidepressant and insulin products.'
+  },
+
+  // ============ ENERGY ============
+  { 
+    name: 'EXXON CORPORATION', 
+    ticker: 'XON', 
+    sector: 'Energy', 
+    basePrice: 32.50, 
+    volatility: 2.5, 
+    peRatio: 10, 
+    dividendYield: 5.2,
+    founded: 1870,
+    ceo: 'Lawrence G. Rawl',
+    headquarters: 'Irving, TX',
+    employees: 104_000,
+    revenue: 105_519,
+    profit: 5_010,
+    cash: 2_456,
+    debt: 8_340,
+    sharesOutstanding: 1247,
+    description: 'World\'s largest oil company. Integrated operations in exploration, production, refining, and chemicals.'
+  },
+  { 
+    name: 'MOBIL CORPORATION', 
+    ticker: 'MOB', 
+    sector: 'Energy', 
+    basePrice: 34.75, 
+    volatility: 2.6, 
+    peRatio: 11, 
+    dividendYield: 4.8,
+    founded: 1911,
+    ceo: 'Allen E. Murray',
+    headquarters: 'Fairfax, VA',
+    employees: 67_700,
+    revenue: 58_770,
+    profit: 1_929,
+    cash: 1_890,
+    debt: 5_670,
+    sharesOutstanding: 407,
+    description: 'Major integrated oil company. Strong presence in exploration, refining, and retail marketing.'
+  },
+  { 
+    name: 'CHEVRON CORPORATION', 
+    ticker: 'CHV', 
+    sector: 'Energy', 
+    basePrice: 28.25, 
+    volatility: 2.7, 
+    peRatio: 12, 
+    dividendYield: 5.5,
+    founded: 1879,
+    ceo: 'Kenneth T. Derr',
+    headquarters: 'San Francisco, CA',
+    employees: 54_000,
+    revenue: 41_542,
+    profit: 1_293,
+    cash: 1_567,
+    debt: 6_234,
+    sharesOutstanding: 342,
+    description: 'Integrated petroleum company. Major operations in US, Canada, and international markets.'
+  },
+  { 
+    name: 'TEXACO INC', 
+    ticker: 'TX', 
+    sector: 'Energy', 
+    basePrice: 31.50, 
+    volatility: 3.0, 
+    peRatio: 13, 
+    dividendYield: 5.0,
+    founded: 1901,
+    ceo: 'James W. Kinnear',
+    headquarters: 'White Plains, NY',
+    employees: 39_897,
+    revenue: 41_235,
+    profit: 1_456,
+    cash: 1_234,
+    debt: 7_890,
+    sharesOutstanding: 250,
+    description: 'Major oil company. Recovering from Pennzoil litigation. Strong in refining and marketing.'
+  },
+
+  // ============ CONSUMER ============
+  { 
+    name: 'PROCTER & GAMBLE CO', 
+    ticker: 'PG', 
+    sector: 'Consumer', 
+    basePrice: 21.50, 
+    volatility: 1.6, 
+    peRatio: 16, 
+    dividendYield: 3.2,
+    founded: 1837,
+    ceo: 'Edwin L. Artzt',
+    headquarters: 'Cincinnati, OH',
+    employees: 79_000,
+    revenue: 24_081,
+    profit: 1_602,
+    cash: 2_156,
+    debt: 3_456,
+    sharesOutstanding: 344,
+    description: 'World\'s largest consumer products company. Brands include Tide, Pampers, Crest, and Ivory.'
+  },
+  { 
+    name: 'COCA-COLA COMPANY', 
+    ticker: 'KO', 
+    sector: 'Consumer', 
+    basePrice: 11.25, 
+    volatility: 1.8, 
+    peRatio: 22, 
+    dividendYield: 2.5,
+    founded: 1886,
+    ceo: 'Roberto C. Goizueta',
+    headquarters: 'Atlanta, GA',
+    employees: 22_000,
+    revenue: 10_236,
+    profit: 1_382,
+    cash: 1_429,
+    debt: 536,
+    sharesOutstanding: 667,
+    description: 'World\'s largest soft drink company. Flagship Coca-Cola brand sold in over 195 countries.'
+  },
+  { 
+    name: 'PEPSICO INC', 
+    ticker: 'PEP', 
+    sector: 'Consumer', 
+    basePrice: 13.75, 
+    volatility: 2.0, 
+    peRatio: 18, 
+    dividendYield: 2.2,
+    founded: 1898,
+    ceo: 'Wayne Calloway',
+    headquarters: 'Purchase, NY',
+    employees: 308_000,
+    revenue: 17_803,
+    profit: 1_077,
+    cash: 456,
+    debt: 6_143,
+    sharesOutstanding: 399,
+    description: 'Beverage and snack company. Owns Pepsi-Cola, Frito-Lay snacks, and Pizza Hut, Taco Bell, KFC restaurants.'
+  },
+  { 
+    name: 'PHILIP MORRIS COS', 
+    ticker: 'MO', 
+    sector: 'Consumer', 
+    basePrice: 17.50, 
+    volatility: 2.4, 
+    peRatio: 11, 
+    dividendYield: 4.5,
+    founded: 1847,
+    ceo: 'Hamish Maxwell',
+    headquarters: 'New York, NY',
+    employees: 168_000,
+    revenue: 51_169,
+    profit: 3_540,
+    cash: 178,
+    debt: 14_213,
+    sharesOutstanding: 473,
+    description: 'Largest US tobacco company. Also owns Kraft Foods and Miller Brewing. Marlboro is world\'s best-selling cigarette.'
+  },
+
+  // ============ INDUSTRIAL ============
+  { 
+    name: 'GENERAL ELECTRIC CO', 
+    ticker: 'GE', 
+    sector: 'Industrial', 
+    basePrice: 16.75, 
+    volatility: 2.0, 
+    peRatio: 14, 
+    dividendYield: 3.5,
+    founded: 1892,
+    ceo: 'John F. Welch Jr.',
+    headquarters: 'Fairfield, CT',
+    employees: 298_000,
+    revenue: 58_414,
+    profit: 4_303,
+    cash: 3_267,
+    debt: 7_890,
+    sharesOutstanding: 884,
+    description: 'Diversified industrial conglomerate. Operations in aircraft engines, power generation, plastics, and financial services.'
+  },
+  { 
+    name: 'BOEING COMPANY', 
+    ticker: 'BA', 
+    sector: 'Industrial', 
+    basePrice: 42.25, 
+    volatility: 3.2, 
+    peRatio: 12, 
+    dividendYield: 2.8,
+    founded: 1916,
+    ceo: 'Frank A. Shrontz',
+    headquarters: 'Seattle, WA',
+    employees: 161,
+    revenue: 27_595,
+    profit: 1_385,
+    cash: 3_456,
+    debt: 1_234,
+    sharesOutstanding: 342,
+    description: 'World\'s largest aerospace company. Manufactures 737, 747, 757, 767 commercial aircraft and military planes.'
+  },
+  { 
+    name: 'CATERPILLAR INC', 
+    ticker: 'CAT', 
+    sector: 'Industrial', 
+    basePrice: 24.50, 
+    volatility: 3.5, 
+    peRatio: 11, 
+    dividendYield: 3.8,
+    founded: 1925,
+    ceo: 'Donald V. Fites',
+    headquarters: 'Peoria, IL',
+    employees: 60_446,
+    revenue: 11_436,
+    profit: 497,
+    cash: 567,
+    debt: 3_456,
+    sharesOutstanding: 102,
+    description: 'World\'s largest manufacturer of earth-moving machinery, construction equipment, and diesel engines.'
+  },
+  { 
+    name: '3M COMPANY', 
+    ticker: 'MMM', 
+    sector: 'Industrial', 
+    basePrice: 41.00, 
+    volatility: 1.8, 
+    peRatio: 15, 
+    dividendYield: 3.2,
+    founded: 1902,
+    ceo: 'Allen F. Jacobson',
+    headquarters: 'St. Paul, MN',
+    employees: 88,
+    revenue: 13_021,
+    profit: 1_308,
+    cash: 345,
+    debt: 1_123,
+    sharesOutstanding: 222,
+    description: 'Diversified technology company. Known for Post-it Notes, Scotch tape, and over 60,000 products.'
+  },
+
+  // ============ TELECOM ============
+  { 
+    name: 'AMERICAN TEL & TEL', 
+    ticker: 'T', 
+    sector: 'Telecom', 
+    basePrice: 29.25, 
+    volatility: 1.8, 
+    peRatio: 12, 
+    dividendYield: 4.5,
+    founded: 1885,
+    ceo: 'Robert E. Allen',
+    headquarters: 'New York, NY',
+    employees: 273_000,
+    revenue: 37_285,
+    profit: 2_735,
+    cash: 1_234,
+    debt: 8_567,
+    sharesOutstanding: 1080,
+    description: 'Largest telecommunications company. Post-divestiture focuses on long distance, equipment manufacturing.'
+  },
+  { 
+    name: 'GTE CORPORATION', 
+    ticker: 'GTE', 
+    sector: 'Telecom', 
+    basePrice: 30.75, 
+    volatility: 2.0, 
+    peRatio: 11, 
+    dividendYield: 5.2,
+    founded: 1918,
+    ceo: 'James L. Johnson',
+    headquarters: 'Stamford, CT',
+    employees: 135,
+    revenue: 19_621,
+    profit: 1_459,
+    cash: 890,
+    debt: 5_678,
+    sharesOutstanding: 481,
+    description: 'Largest US-based local telephone company. Also manufactures telecommunications equipment.'
+  },
+  { 
+    name: 'MCI COMMUNICATIONS', 
+    ticker: 'MCIC', 
+    sector: 'Telecom', 
+    basePrice: 8.75, 
+    volatility: 4.8, 
+    peRatio: 28, 
+    dividendYield: 0,
+    founded: 1963,
+    ceo: 'William G. McGowan',
+    headquarters: 'Washington, DC',
+    employees: 25,
+    revenue: 7_680,
+    profit: 551,
+    cash: 456,
+    debt: 2_345,
+    sharesOutstanding: 273,
+    description: 'Second largest long distance carrier. Pioneer in breaking AT&T\'s monopoly. Growing rapidly.'
+  },
+
+  // ============ MEDIA ============
+  { 
+    name: 'CAPITAL CITIES/ABC', 
+    ticker: 'CCB', 
+    sector: 'Media', 
+    basePrice: 202.50, 
+    volatility: 2.8, 
+    peRatio: 19, 
+    dividendYield: 0.8,
+    founded: 1954,
+    ceo: 'Thomas S. Murphy',
+    headquarters: 'New York, NY',
+    employees: 23,
+    revenue: 5_382,
+    profit: 485,
+    cash: 234,
+    debt: 1_890,
+    sharesOutstanding: 17.3,
+    description: 'Major broadcasting company. Owns ABC television network, ESPN, and numerous TV and radio stations.'
+  },
+  { 
+    name: 'CBS INC', 
+    ticker: 'CBS', 
+    sector: 'Media', 
+    basePrice: 178.25, 
+    volatility: 3.0, 
+    peRatio: 14, 
+    dividendYield: 2.2,
+    founded: 1927,
+    ceo: 'Laurence A. Tisch',
+    headquarters: 'New York, NY',
+    employees: 6,
+    revenue: 3_263,
+    profit: 381,
+    cash: 1_234,
+    debt: 567,
+    sharesOutstanding: 23.8,
+    description: 'Broadcasting company. Owns CBS television network and CBS Records. Historic leader in TV news.'
+  },
+  { 
+    name: 'WALT DISNEY CO', 
+    ticker: 'DIS', 
+    sector: 'Media', 
+    basePrice: 26.75, 
+    volatility: 3.2, 
+    peRatio: 22, 
+    dividendYield: 0.6,
+    founded: 1923,
+    ceo: 'Michael D. Eisner',
+    headquarters: 'Burbank, CA',
+    employees: 58,
+    revenue: 5_844,
+    profit: 824,
+    cash: 890,
+    debt: 1_234,
+    sharesOutstanding: 138,
+    description: 'Entertainment company. Theme parks, film studio, and consumer products. Resurgent under Eisner.'
+  },
+
+  // ============ RETAIL ============
+  { 
+    name: 'WAL-MART STORES INC', 
+    ticker: 'WMT', 
+    sector: 'Retail', 
+    basePrice: 6.25, 
+    volatility: 4.2, 
+    peRatio: 28, 
+    dividendYield: 0.3,
+    founded: 1962,
+    ceo: 'Sam M. Walton',
+    headquarters: 'Bentonville, AR',
+    employees: 328,
+    revenue: 32_601,
+    profit: 1_076,
+    cash: 234,
+    debt: 1_456,
+    sharesOutstanding: 575,
+    description: 'Fastest growing retailer in US. Discount stores primarily in Southeast and Midwest. Revolutionary logistics.'
+  },
+  { 
+    name: 'SEARS ROEBUCK & CO', 
+    ticker: 'S', 
+    sector: 'Retail', 
+    basePrice: 32.25, 
+    volatility: 2.4, 
+    peRatio: 10, 
+    dividendYield: 5.5,
+    founded: 1893,
+    ceo: 'Edward A. Brennan',
+    headquarters: 'Chicago, IL',
+    employees: 520,
+    revenue: 55,
+    profit: 1,
+    cash: 1_890,
+    debt: 8_567,
+    sharesOutstanding: 382,
+    description: 'Largest US retailer. Department stores, Allstate Insurance, Dean Witter financial services, Coldwell Banker real estate.'
+  },
+  { 
+    name: 'K MART CORPORATION', 
+    ticker: 'KM', 
+    sector: 'Retail', 
+    basePrice: 28.50, 
+    volatility: 2.6, 
+    peRatio: 12, 
+    dividendYield: 3.5,
+    founded: 1962,
+    ceo: 'Joseph E. Antonini',
+    headquarters: 'Troy, MI',
+    employees: 350,
+    revenue: 32,
+    profit: 941,
+    cash: 567,
+    debt: 2_345,
+    sharesOutstanding: 200,
+    description: 'Major discount retailer. Second only to Wal-Mart in discount sector. Diversifying into specialty retail.'
+  },
+  { 
+    name: 'HOME DEPOT INC', 
+    ticker: 'HD', 
+    sector: 'Retail', 
+    basePrice: 4.25, 
+    volatility: 5.5, 
+    peRatio: 35, 
+    dividendYield: 0.2,
+    founded: 1978,
+    ceo: 'Bernard Marcus',
+    headquarters: 'Atlanta, GA',
+    employees: 21,
+    revenue: 3_815,
+    profit: 163,
+    cash: 123,
+    debt: 234,
+    sharesOutstanding: 153,
+    description: 'Home improvement warehouse chain. Revolutionary concept in do-it-yourself retail. Rapid expansion.'
+  },
+
+  // ============ DEFENSE ============
+  { 
+    name: 'LOCKHEED CORPORATION', 
+    ticker: 'LK', 
+    sector: 'Defense', 
+    basePrice: 38.75, 
+    volatility: 2.8, 
+    peRatio: 11, 
+    dividendYield: 3.2,
+    founded: 1926,
+    ceo: 'Daniel M. Tellep',
+    headquarters: 'Calabasas, CA',
+    employees: 81,
+    revenue: 10,
+    profit: 335,
+    cash: 456,
+    debt: 1_234,
+    sharesOutstanding: 62,
+    description: 'Major defense contractor. Builds F-117 Stealth fighter, C-130 transport, and Trident missiles.'
+  },
+  { 
+    name: 'GENERAL DYNAMICS', 
+    ticker: 'GD', 
+    sector: 'Defense', 
+    basePrice: 35.50, 
+    volatility: 3.0, 
+    peRatio: 10, 
+    dividendYield: 3.5,
+    founded: 1952,
+    ceo: 'William A. Anders',
+    headquarters: 'Falls Church, VA',
+    employees: 103,
+    revenue: 10,
+    profit: 296,
+    cash: 1_234,
+    debt: 890,
+    sharesOutstanding: 42,
+    description: 'Defense contractor. Builds F-16 fighter jets, M1 Abrams tanks, and nuclear submarines.'
+  },
+  { 
+    name: 'RAYTHEON COMPANY', 
+    ticker: 'RTN', 
+    sector: 'Defense', 
+    basePrice: 32.25, 
+    volatility: 2.6, 
+    peRatio: 13, 
+    dividendYield: 2.8,
+    founded: 1922,
+    ceo: 'Dennis J. Picard',
+    headquarters: 'Lexington, MA',
+    employees: 77,
+    revenue: 9,
+    profit: 415,
+    cash: 345,
+    debt: 567,
+    sharesOutstanding: 128,
+    description: 'Defense electronics company. Known for Patriot and Hawk missile systems. Also makes appliances.'
+  },
+
+  // ============ TRANSPORTATION ============
+  { 
+    name: 'UNITED AIRLINES INC', 
+    ticker: 'UAL', 
+    sector: 'Transportation', 
+    basePrice: 125.50, 
+    volatility: 4.2, 
+    peRatio: 8, 
+    dividendYield: 0,
+    founded: 1926,
+    ceo: 'Stephen M. Wolf',
+    headquarters: 'Chicago, IL',
+    employees: 74,
+    revenue: 11,
+    profit: 326,
+    cash: 234,
+    debt: 3_456,
+    sharesOutstanding: 24.5,
+    description: 'Largest US airline by revenue passenger miles. Major hub operations at O\'Hare and Denver.'
+  },
+  { 
+    name: 'AMERICAN AIRLINES', 
+    ticker: 'AMR', 
+    sector: 'Transportation', 
+    basePrice: 58.75, 
+    volatility: 4.0, 
+    peRatio: 9, 
+    dividendYield: 0,
+    founded: 1930,
+    ceo: 'Robert L. Crandall',
+    headquarters: 'Fort Worth, TX',
+    employees: 88,
+    revenue: 11,
+    profit: 477,
+    cash: 456,
+    debt: 2_890,
+    sharesOutstanding: 76,
+    description: 'Major US airline. Pioneer of yield management and frequent flyer programs with AAdvantage.'
+  },
+  { 
+    name: 'FEDERAL EXPRESS CORP', 
+    ticker: 'FDX', 
+    sector: 'Transportation', 
+    basePrice: 38.50, 
+    volatility: 3.8, 
+    peRatio: 20, 
+    dividendYield: 0.5,
+    founded: 1971,
+    ceo: 'Frederick W. Smith',
+    headquarters: 'Memphis, TN',
+    employees: 90,
+    revenue: 7,
+    profit: 185,
+    cash: 123,
+    debt: 1_678,
+    sharesOutstanding: 54,
+    description: 'Pioneer of overnight delivery service. Dominates express shipping market. "When it absolutely has to be there overnight."'
+  },
+
+  // ============ UTILITIES ============
+  { 
+    name: 'PACIFIC GAS & ELECTRIC', 
+    ticker: 'PCG', 
+    sector: 'Utilities', 
+    basePrice: 22.25, 
+    volatility: 1.4, 
+    peRatio: 10, 
+    dividendYield: 6.8,
+    founded: 1905,
+    ceo: 'Richard A. Clarke',
+    headquarters: 'San Francisco, CA',
+    employees: 26,
+    revenue: 9,
+    profit: 947,
+    cash: 234,
+    debt: 6_789,
+    sharesOutstanding: 401,
+    description: 'Largest investor-owned utility in US. Serves Northern and Central California with gas and electricity.'
+  },
+  { 
+    name: 'SOUTHERN COMPANY', 
+    ticker: 'SO', 
+    sector: 'Utilities', 
+    basePrice: 18.50, 
+    volatility: 1.2, 
+    peRatio: 9, 
+    dividendYield: 7.2,
+    founded: 1945,
+    ceo: 'Edward L. Addison',
+    headquarters: 'Atlanta, GA',
+    employees: 31,
+    revenue: 9,
+    profit: 1_016,
+    cash: 345,
+    debt: 8_234,
+    sharesOutstanding: 657,
+    description: 'Electric utility holding company. Serves Southeast US through Georgia Power, Alabama Power, and others.'
+  },
+
+  // ============ REAL ESTATE ============
+  { 
+    name: 'ROUSE COMPANY', 
+    ticker: 'RSE', 
+    sector: 'Real Estate', 
+    basePrice: 22.75, 
+    volatility: 2.6, 
+    peRatio: 15, 
+    dividendYield: 4.0,
+    founded: 1939,
+    ceo: 'James W. Rouse',
+    headquarters: 'Columbia, MD',
+    employees: 4,
+    revenue: 1,
+    profit: 75,
+    cash: 89,
+    debt: 1_567,
+    sharesOutstanding: 58,
+    description: 'Real estate developer. Known for festival marketplaces like Faneuil Hall and Harborplace.'
+  },
+
+  // ============ MATERIALS ============
+  { 
+    name: 'DOW CHEMICAL COMPANY', 
+    ticker: 'DOW', 
+    sector: 'Materials', 
+    basePrice: 38.25, 
+    volatility: 3.0, 
+    peRatio: 10, 
+    dividendYield: 4.2,
+    founded: 1897,
+    ceo: 'Frank P. Popoff',
+    headquarters: 'Midland, MI',
+    employees: 62,
+    revenue: 19,
+    profit: 1_488,
+    cash: 890,
+    debt: 4_567,
+    sharesOutstanding: 250,
+    description: 'Major chemical company. Produces plastics, chemicals, and agricultural products. Global operations.'
+  },
+  { 
+    name: 'DU PONT DE NEMOURS', 
+    ticker: 'DD', 
+    sector: 'Materials', 
+    basePrice: 35.50, 
+    volatility: 2.5, 
+    peRatio: 12, 
+    dividendYield: 4.0,
+    founded: 1802,
+    ceo: 'Edgar S. Woolard Jr.',
+    headquarters: 'Wilmington, DE',
+    employees: 140,
+    revenue: 38,
+    profit: 2_310,
+    cash: 1_234,
+    debt: 5_678,
+    sharesOutstanding: 338,
+    description: 'Diversified chemicals and materials company. Known for nylon, Teflon, Kevlar, and Lycra.'
+  },
+
+  // ============ AGRICULTURE ============
+  { 
+    name: 'ARCHER DANIELS MIDLAND', 
+    ticker: 'ADM', 
+    sector: 'Agriculture', 
+    basePrice: 15.75, 
+    volatility: 2.8, 
+    peRatio: 11, 
+    dividendYield: 2.5,
+    founded: 1902,
+    ceo: 'Dwayne O. Andreas',
+    headquarters: 'Decatur, IL',
+    employees: 14,
+    revenue: 8,
+    profit: 429,
+    cash: 234,
+    debt: 1_234,
+    sharesOutstanding: 301,
+    description: 'Agricultural processor. World leader in soybean processing, corn refining, and flour milling.'
+  },
+  { 
+    name: 'DEERE & COMPANY', 
+    ticker: 'DE', 
+    sector: 'Agriculture', 
+    basePrice: 24.50, 
+    volatility: 3.2, 
+    peRatio: 13, 
+    dividendYield: 2.8,
+    founded: 1837,
+    ceo: 'Hans W. Becherer',
+    headquarters: 'Moline, IL',
+    employees: 37,
+    revenue: 8,
+    profit: 411,
+    cash: 1_234,
+    debt: 2_345,
+    sharesOutstanding: 239,
+    description: 'World\'s largest manufacturer of farm equipment. Also produces construction and lawn care equipment.'
+  },
+]
+
+export function generateInitialCompanies(): Company[] {
+  return COMPANY_TEMPLATES.map((template, index) => {
+    const priceVariation = 0.95 + Math.random() * 0.1
+    const stockPrice = Number((template.basePrice * priceVariation).toFixed(2))
+    const sharesOutstandingActual = template.sharesOutstanding * 1_000_000
+    
+    return {
+      id: `company-${index + 1}`,
+      name: template.name,
+      ticker: template.ticker,
+      sector: template.sector,
+      stockPrice,
+      previousPrice: stockPrice,
+      sharesOutstanding: sharesOutstandingActual,
+      marketCap: stockPrice * sharesOutstandingActual,
+      peRatio: template.peRatio + (Math.random() - 0.5) * 2,
+      dividendYield: template.dividendYield,
+      debt: template.debt * 1_000_000,
+      cash: template.cash * 1_000_000,
+      revenue: template.revenue * 1_000_000,
+      profit: template.profit * 1_000_000,
+      employees: template.employees * 1000,
+      founded: template.founded,
+      ceo: template.ceo,
+      isPublic: true,
+      isListed: true, // All classic companies are already listed
+      isPennytStock: stockPrice < 5,
+      volatility: template.volatility,
+      news: [],
+      ownedBy: null,
+      ownershipPercentage: 0,
+      description: template.description,
+      headquarters: template.headquarters,
+      priceHistory: [],
+      tradeMarkers: []
+    }
+  })
+}
+
+// ============ MODERN COMPANIES (2010-2026) with IPO dates ============
+interface ModernCompanyTemplate extends CompanyTemplate {
+  listingYear: number
+  listingMonth: number
+}
+
+const MODERN_COMPANY_TEMPLATES: ModernCompanyTemplate[] = [
+  // Already public before 2010 - available from start
+  { name: 'APPLE INC', ticker: 'AAPL', sector: 'Technology', basePrice: 27.50, volatility: 3.0, peRatio: 18, dividendYield: 0, founded: 1976, ceo: 'Tim Cook', headquarters: 'Cupertino, CA', employees: 147, revenue: 274_515, profit: 57_411, cash: 76_826, debt: 112_436, sharesOutstanding: 16_788, description: 'World\'s most valuable company. iPhones, Macs, iPads.', listingYear: 1980, listingMonth: 12 },
+  { name: 'MICROSOFT CORP', ticker: 'MSFT', sector: 'Technology', basePrice: 28.00, volatility: 2.5, peRatio: 15, dividendYield: 1.8, founded: 1975, ceo: 'Satya Nadella', headquarters: 'Redmond, WA', employees: 181, revenue: 168_088, profit: 61_271, cash: 130_334, debt: 50_074, sharesOutstanding: 7_432, description: 'Cloud computing and software giant. Azure, Office 365.', listingYear: 1986, listingMonth: 3 },
+  { name: 'AMAZON.COM INC', ticker: 'AMZN', sector: 'Technology', basePrice: 180.00, volatility: 4.0, peRatio: 70, dividendYield: 0, founded: 1994, ceo: 'Andy Jassy', headquarters: 'Seattle, WA', employees: 1_541, revenue: 513_983, profit: 30_425, cash: 70_026, debt: 67_651, sharesOutstanding: 10_334, description: 'E-commerce and cloud computing titan. AWS dominates.', listingYear: 1997, listingMonth: 5 },
+  { name: 'ALPHABET INC', ticker: 'GOOGL', sector: 'Technology', basePrice: 295.00, volatility: 3.5, peRatio: 25, dividendYield: 0, founded: 1998, ceo: 'Sundar Pichai', headquarters: 'Mountain View, CA', employees: 156, revenue: 282_836, profit: 73_795, cash: 118_265, debt: 14_817, sharesOutstanding: 12_849, description: 'Search, advertising, and AI leader. Google, YouTube.', listingYear: 2004, listingMonth: 8 },
+  { name: 'NVIDIA CORP', ticker: 'NVDA', sector: 'Technology', basePrice: 12.00, volatility: 5.5, peRatio: 45, dividendYield: 0.1, founded: 1993, ceo: 'Jensen Huang', headquarters: 'Santa Clara, CA', employees: 26, revenue: 60_922, profit: 29_760, cash: 25_984, debt: 9_704, sharesOutstanding: 24_940, description: 'AI chip leader. GPUs power gaming and AI.', listingYear: 1999, listingMonth: 1 },
+  { name: 'NETFLIX INC', ticker: 'NFLX', sector: 'Technology', basePrice: 17.50, volatility: 5.0, peRatio: 35, dividendYield: 0, founded: 1997, ceo: 'Ted Sarandos', headquarters: 'Los Gatos, CA', employees: 12, revenue: 31_616, profit: 5_408, cash: 6_560, debt: 14_353, sharesOutstanding: 443, description: 'Streaming entertainment leader.', listingYear: 2002, listingMonth: 5 },
+  { name: 'JPMORGAN CHASE', ticker: 'JPM', sector: 'Finance', basePrice: 43.00, volatility: 3.0, peRatio: 12, dividendYield: 2.8, founded: 1799, ceo: 'Jamie Dimon', headquarters: 'New York, NY', employees: 293, revenue: 158_104, profit: 48_334, cash: 561_939, debt: 295_612, sharesOutstanding: 2_871, description: 'Largest US bank.', listingYear: 1969, listingMonth: 1 },
+  { name: 'GOLDMAN SACHS', ticker: 'GS', sector: 'Finance', basePrice: 170.00, volatility: 4.0, peRatio: 10, dividendYield: 2.5, founded: 1869, ceo: 'David Solomon', headquarters: 'New York, NY', employees: 45, revenue: 47_365, profit: 8_516, cash: 261_000, debt: 180_000, sharesOutstanding: 334, description: 'Premier investment bank.', listingYear: 1999, listingMonth: 5 },
+  { name: 'UNITEDHEALTH GROUP', ticker: 'UNH', sector: 'Healthcare', basePrice: 35.00, volatility: 2.5, peRatio: 18, dividendYield: 1.4, founded: 1977, ceo: 'Andrew Witty', headquarters: 'Minnetonka, MN', employees: 400, revenue: 371_622, profit: 22_381, cash: 23_869, debt: 50_076, sharesOutstanding: 923, description: 'Largest US health insurer.', listingYear: 1984, listingMonth: 10 },
+  { name: 'JOHNSON & JOHNSON', ticker: 'JNJ', sector: 'Healthcare', basePrice: 62.00, volatility: 1.8, peRatio: 16, dividendYield: 2.8, founded: 1886, ceo: 'Joaquin Duato', headquarters: 'New Brunswick, NJ', employees: 152, revenue: 85_159, profit: 14_099, cash: 23_063, debt: 30_045, sharesOutstanding: 2_407, description: 'Healthcare conglomerate.', listingYear: 1944, listingMonth: 1 },
+  { name: 'PFIZER INC', ticker: 'PFE', sector: 'Healthcare', basePrice: 17.00, volatility: 2.8, peRatio: 14, dividendYield: 4.0, founded: 1849, ceo: 'Albert Bourla', headquarters: 'New York, NY', employees: 83, revenue: 58_496, profit: 2_119, cash: 9_917, debt: 61_538, sharesOutstanding: 5_610, description: 'Global pharmaceutical giant.', listingYear: 1944, listingMonth: 1 },
+  { name: 'WALMART INC', ticker: 'WMT', sector: 'Consumer', basePrice: 55.00, volatility: 1.8, peRatio: 22, dividendYield: 1.5, founded: 1962, ceo: 'Doug McMillon', headquarters: 'Bentonville, AR', employees: 2100, revenue: 611_289, profit: 11_680, cash: 8_705, debt: 46_707, sharesOutstanding: 2_680, description: 'World\'s largest retailer.', listingYear: 1972, listingMonth: 10 },
+  { name: 'EXXON MOBIL', ticker: 'XOM', sector: 'Energy', basePrice: 65.00, volatility: 3.0, peRatio: 10, dividendYield: 3.8, founded: 1999, ceo: 'Darren Woods', headquarters: 'Irving, TX', employees: 62, revenue: 413_680, profit: 36_010, cash: 29_522, debt: 40_559, sharesOutstanding: 4_219, description: 'Largest US oil company.', listingYear: 1920, listingMonth: 1 },
+  { name: 'CHEVRON CORP', ticker: 'CVX', sector: 'Energy', basePrice: 90.00, volatility: 3.2, peRatio: 11, dividendYield: 4.0, founded: 1879, ceo: 'Mike Wirth', headquarters: 'San Ramon, CA', employees: 43, revenue: 200_949, profit: 21_369, cash: 5_972, debt: 20_821, sharesOutstanding: 1_843, description: 'Integrated energy major.', listingYear: 1921, listingMonth: 1 },
+  { name: 'AT&T INC', ticker: 'T', sector: 'Telecom', basePrice: 29.00, volatility: 2.5, peRatio: 8, dividendYield: 6.5, founded: 1885, ceo: 'John Stankey', headquarters: 'Dallas, TX', employees: 160, revenue: 120_741, profit: 14_400, cash: 4_914, debt: 137_000, sharesOutstanding: 7_174, description: 'Telecom giant.', listingYear: 1984, listingMonth: 1 },
+  
+  // IPOs during 2010-2026 period
+  { name: 'TESLA INC', ticker: 'TSLA', sector: 'Technology', basePrice: 17.00, volatility: 8.0, peRatio: 50, dividendYield: 0, founded: 2003, ceo: 'Elon Musk', headquarters: 'Austin, TX', employees: 127, revenue: 96_773, profit: 12_556, cash: 22_185, debt: 5_748, sharesOutstanding: 3_169, description: 'Electric vehicle pioneer. EVs, energy storage, AI.', listingYear: 2010, listingMonth: 6 },
+  { name: 'META PLATFORMS', ticker: 'META', sector: 'Technology', basePrice: 38.00, volatility: 5.0, peRatio: 14, dividendYield: 0, founded: 2004, ceo: 'Mark Zuckerberg', headquarters: 'Menlo Park, CA', employees: 67, revenue: 116_609, profit: 39_098, cash: 40_738, debt: 18_385, sharesOutstanding: 2_586, description: 'Social media empire. Facebook, Instagram, WhatsApp.', listingYear: 2012, listingMonth: 5 },
+  { name: 'TWITTER INC', ticker: 'TWTR', sector: 'Technology', basePrice: 26.00, volatility: 6.0, peRatio: 0, dividendYield: 0, founded: 2006, ceo: 'Elon Musk', headquarters: 'San Francisco, CA', employees: 7, revenue: 5_077, profit: -221, cash: 6_394, debt: 5_570, sharesOutstanding: 765, description: 'Social media platform. Real-time news, X rebrand.', listingYear: 2013, listingMonth: 11 },
+  { name: 'ALIBABA GROUP', ticker: 'BABA', sector: 'Technology', basePrice: 68.00, volatility: 5.5, peRatio: 20, dividendYield: 0, founded: 1999, ceo: 'Daniel Zhang', headquarters: 'Hangzhou, China', employees: 235, revenue: 126_491, profit: 10_584, cash: 71_721, debt: 21_000, sharesOutstanding: 2_539, description: 'Chinese e-commerce giant. Largest IPO ever.', listingYear: 2014, listingMonth: 9 },
+  { name: 'SNAP INC', ticker: 'SNAP', sector: 'Technology', basePrice: 17.00, volatility: 8.0, peRatio: 0, dividendYield: 0, founded: 2011, ceo: 'Evan Spiegel', headquarters: 'Santa Monica, CA', employees: 5, revenue: 4_602, profit: -1_430, cash: 3_877, debt: 3_743, sharesOutstanding: 1_637, description: 'Snapchat, AR glasses, camera company.', listingYear: 2017, listingMonth: 3 },
+  { name: 'SPOTIFY', ticker: 'SPOT', sector: 'Technology', basePrice: 132.00, volatility: 5.5, peRatio: 0, dividendYield: 0, founded: 2006, ceo: 'Daniel Ek', headquarters: 'Stockholm, Sweden', employees: 9, revenue: 13_247, profit: -532, cash: 3_969, debt: 1_578, sharesOutstanding: 197, description: 'Music streaming leader. Podcasts, audiobooks.', listingYear: 2018, listingMonth: 4 },
+  { name: 'UBER TECHNOLOGIES', ticker: 'UBER', sector: 'Technology', basePrice: 45.00, volatility: 6.0, peRatio: 0, dividendYield: 0, founded: 2009, ceo: 'Dara Khosrowshahi', headquarters: 'San Francisco, CA', employees: 32, revenue: 37_281, profit: 1_887, cash: 4_680, debt: 9_459, sharesOutstanding: 2_050, description: 'Ride-sharing, food delivery, freight.', listingYear: 2019, listingMonth: 5 },
+  { name: 'LYFT INC', ticker: 'LYFT', sector: 'Technology', basePrice: 72.00, volatility: 7.0, peRatio: 0, dividendYield: 0, founded: 2012, ceo: 'David Risher', headquarters: 'San Francisco, CA', employees: 4, revenue: 4_095, profit: -340, cash: 1_768, debt: 782, sharesOutstanding: 384, description: 'Ride-sharing competitor to Uber.', listingYear: 2019, listingMonth: 3 },
+  { name: 'ZOOM VIDEO', ticker: 'ZM', sector: 'Technology', basePrice: 36.00, volatility: 7.0, peRatio: 25, dividendYield: 0, founded: 2011, ceo: 'Eric Yuan', headquarters: 'San Jose, CA', employees: 8, revenue: 4_527, profit: 103, cash: 5_922, debt: 0, sharesOutstanding: 304, description: 'Video conferencing. COVID beneficiary.', listingYear: 2019, listingMonth: 4 },
+  { name: 'PALANTIR', ticker: 'PLTR', sector: 'Technology', basePrice: 10.00, volatility: 7.5, peRatio: 100, dividendYield: 0, founded: 2003, ceo: 'Alex Karp', headquarters: 'Denver, CO', employees: 3, revenue: 2_225, profit: 209, cash: 3_091, debt: 229, sharesOutstanding: 2_190, description: 'Data analytics, government contracts, AI.', listingYear: 2020, listingMonth: 9 },
+  { name: 'AIRBNB INC', ticker: 'ABNB', sector: 'Technology', basePrice: 68.00, volatility: 6.5, peRatio: 30, dividendYield: 0, founded: 2008, ceo: 'Brian Chesky', headquarters: 'San Francisco, CA', employees: 6, revenue: 9_917, profit: 1_893, cash: 10_591, debt: 1_989, sharesOutstanding: 635, description: 'Home sharing platform. Travel revolution.', listingYear: 2020, listingMonth: 12 },
+  { name: 'DOORDASH INC', ticker: 'DASH', sector: 'Technology', basePrice: 102.00, volatility: 7.0, peRatio: 0, dividendYield: 0, founded: 2013, ceo: 'Tony Xu', headquarters: 'San Francisco, CA', employees: 18, revenue: 8_635, profit: -558, cash: 3_014, debt: 500, sharesOutstanding: 397, description: 'Food delivery leader in US.', listingYear: 2020, listingMonth: 12 },
+  { name: 'COINBASE GLOBAL', ticker: 'COIN', sector: 'Finance', basePrice: 250.00, volatility: 10.0, peRatio: 15, dividendYield: 0, founded: 2012, ceo: 'Brian Armstrong', headquarters: 'San Francisco, CA', employees: 5, revenue: 3_108, profit: -1_094, cash: 5_346, debt: 3_379, sharesOutstanding: 195, description: 'Crypto exchange. First major crypto IPO.', listingYear: 2021, listingMonth: 4 },
+  { name: 'ROBINHOOD MARKETS', ticker: 'HOOD', sector: 'Finance', basePrice: 38.00, volatility: 9.0, peRatio: 0, dividendYield: 0, founded: 2013, ceo: 'Vlad Tenev', headquarters: 'Menlo Park, CA', employees: 3, revenue: 1_865, profit: -1_028, cash: 6_270, debt: 0, sharesOutstanding: 884, description: 'Commission-free trading. Retail revolution.', listingYear: 2021, listingMonth: 7 },
+  { name: 'RIVIAN AUTOMOTIVE', ticker: 'RIVN', sector: 'Technology', basePrice: 78.00, volatility: 10.0, peRatio: 0, dividendYield: 0, founded: 2009, ceo: 'RJ Scaringe', headquarters: 'Irvine, CA', employees: 16, revenue: 4_434, profit: -5_432, cash: 9_130, debt: 4_400, sharesOutstanding: 983, description: 'EV trucks and SUVs. Amazon backed.', listingYear: 2021, listingMonth: 11 },
+  { name: 'MODERNA INC', ticker: 'MRNA', sector: 'Healthcare', basePrice: 23.00, volatility: 9.0, peRatio: 20, dividendYield: 0, founded: 2010, ceo: 'Stéphane Bancel', headquarters: 'Cambridge, MA', employees: 5, revenue: 18_471, profit: 8_362, cash: 18_000, debt: 900, sharesOutstanding: 383, description: 'mRNA pioneer. COVID vaccine hero.', listingYear: 2018, listingMonth: 12 },
+  { name: 'ARM HOLDINGS', ticker: 'ARM', sector: 'Technology', basePrice: 51.00, volatility: 5.0, peRatio: 100, dividendYield: 0, founded: 1990, ceo: 'Rene Haas', headquarters: 'Cambridge, UK', employees: 6, revenue: 2_679, profit: 524, cash: 2_153, debt: 0, sharesOutstanding: 1_025, description: 'Chip architecture. Powers all smartphones.', listingYear: 2023, listingMonth: 9 },
+]
+
+// ============ CRYPTO ASSETS (2009-2026) with real launch dates ============
+interface CryptoTemplate extends CompanyTemplate {
+  listingYear: number
+  listingMonth: number
+}
+
+const CRYPTO_TEMPLATES: CryptoTemplate[] = [
+  // 2009
+  { name: 'BITCOIN', ticker: 'BTC', sector: 'Technology', basePrice: 0.0001, volatility: 50.0, peRatio: 0, dividendYield: 0, founded: 2009, ceo: 'Satoshi Nakamoto', headquarters: 'Decentralized', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 21_000_000, description: 'Digital gold. First cryptocurrency. 21M max supply.', listingYear: 2009, listingMonth: 1 },
+  
+  // 2011
+  { name: 'LITECOIN', ticker: 'LTC', sector: 'Technology', basePrice: 0.03, volatility: 40.0, peRatio: 0, dividendYield: 0, founded: 2011, ceo: 'Charlie Lee', headquarters: 'Decentralized', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 84_000_000, description: 'Silver to Bitcoin\'s gold. Faster transactions.', listingYear: 2011, listingMonth: 10 },
+  
+  // 2012
+  { name: 'XRP', ticker: 'XRP', sector: 'Finance', basePrice: 0.005, volatility: 35.0, peRatio: 0, dividendYield: 0, founded: 2012, ceo: 'Brad Garlinghouse', headquarters: 'San Francisco, CA', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 100_000_000_000, description: 'Cross-border payments. Bank partnerships.', listingYear: 2012, listingMonth: 8 },
+  
+  // 2013
+  { name: 'DOGECOIN', ticker: 'DOGE', sector: 'Technology', basePrice: 0.0001, volatility: 50.0, peRatio: 0, dividendYield: 0, founded: 2013, ceo: 'Billy Markus', headquarters: 'Decentralized', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 140_000_000_000, description: 'Meme coin legend. Much wow, such coin!', listingYear: 2013, listingMonth: 12 },
+  
+  // 2014
+  { name: 'MONERO', ticker: 'XMR', sector: 'Technology', basePrice: 0.50, volatility: 40.0, peRatio: 0, dividendYield: 0, founded: 2014, ceo: 'Community', headquarters: 'Decentralized', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 18_400_000, description: 'Privacy coin leader. Untraceable.', listingYear: 2014, listingMonth: 4 },
+  { name: 'STELLAR', ticker: 'XLM', sector: 'Finance', basePrice: 0.002, volatility: 35.0, peRatio: 0, dividendYield: 0, founded: 2014, ceo: 'Denelle Dixon', headquarters: 'San Francisco, CA', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 50_000_000_000, description: 'Cross-border payments. Low fees.', listingYear: 2014, listingMonth: 7 },
+  
+  // 2015
+  { name: 'ETHEREUM', ticker: 'ETH', sector: 'Technology', basePrice: 0.30, volatility: 45.0, peRatio: 0, dividendYield: 0, founded: 2015, ceo: 'Vitalik Buterin', headquarters: 'Decentralized', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 120_000_000, description: 'Smart contract platform. DeFi, NFTs, Web3.', listingYear: 2015, listingMonth: 7 },
+  
+  // 2017
+  { name: 'BINANCE COIN', ticker: 'BNB', sector: 'Finance', basePrice: 0.10, volatility: 40.0, peRatio: 0, dividendYield: 0, founded: 2017, ceo: 'Changpeng Zhao', headquarters: 'Cayman Islands', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 153_000_000, description: 'Binance exchange token. BSC ecosystem.', listingYear: 2017, listingMonth: 7 },
+  { name: 'CARDANO', ticker: 'ADA', sector: 'Technology', basePrice: 0.02, volatility: 42.0, peRatio: 0, dividendYield: 0, founded: 2017, ceo: 'Charles Hoskinson', headquarters: 'Zug, Switzerland', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 45_000_000_000, description: 'Academic blockchain. Peer-reviewed.', listingYear: 2017, listingMonth: 10 },
+  { name: 'CHAINLINK', ticker: 'LINK', sector: 'Technology', basePrice: 0.11, volatility: 40.0, peRatio: 0, dividendYield: 0, founded: 2017, ceo: 'Sergey Nazarov', headquarters: 'Cayman Islands', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 1_000_000_000, description: 'Oracle network. Real-world data.', listingYear: 2017, listingMonth: 9 },
+  { name: 'TRON', ticker: 'TRX', sector: 'Technology', basePrice: 0.002, volatility: 38.0, peRatio: 0, dividendYield: 0, founded: 2017, ceo: 'Justin Sun', headquarters: 'Singapore', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 88_000_000_000, description: 'Entertainment blockchain. BitTorrent.', listingYear: 2017, listingMonth: 8 },
+  
+  // 2019
+  { name: 'COSMOS', ticker: 'ATOM', sector: 'Technology', basePrice: 2.00, volatility: 40.0, peRatio: 0, dividendYield: 0, founded: 2019, ceo: 'Jae Kwon', headquarters: 'Zug, Switzerland', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 390_000_000, description: 'Internet of blockchains. IBC protocol.', listingYear: 2019, listingMonth: 3 },
+  { name: 'POLYGON', ticker: 'MATIC', sector: 'Technology', basePrice: 0.003, volatility: 45.0, peRatio: 0, dividendYield: 0, founded: 2017, ceo: 'Sandeep Nailwal', headquarters: 'Dubai, UAE', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 10_000_000_000, description: 'Ethereum scaling. Layer 2.', listingYear: 2019, listingMonth: 4 },
+  
+  // 2020
+  { name: 'SOLANA', ticker: 'SOL', sector: 'Technology', basePrice: 0.22, volatility: 50.0, peRatio: 0, dividendYield: 0, founded: 2020, ceo: 'Anatoly Yakovenko', headquarters: 'San Francisco, CA', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 570_000_000, description: 'High-speed blockchain. 65K TPS.', listingYear: 2020, listingMonth: 4 },
+  { name: 'POLKADOT', ticker: 'DOT', sector: 'Technology', basePrice: 2.90, volatility: 42.0, peRatio: 0, dividendYield: 0, founded: 2020, ceo: 'Gavin Wood', headquarters: 'Zug, Switzerland', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 1_400_000_000, description: 'Multi-chain protocol. Parachains.', listingYear: 2020, listingMonth: 8 },
+  { name: 'AVALANCHE', ticker: 'AVAX', sector: 'Technology', basePrice: 3.00, volatility: 45.0, peRatio: 0, dividendYield: 0, founded: 2020, ceo: 'Emin Gün Sirer', headquarters: 'New York, NY', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 720_000_000, description: 'Fast blockchain. Subnets.', listingYear: 2020, listingMonth: 9 },
+  { name: 'UNISWAP', ticker: 'UNI', sector: 'Finance', basePrice: 1.00, volatility: 45.0, peRatio: 0, dividendYield: 0, founded: 2018, ceo: 'Hayden Adams', headquarters: 'New York, NY', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 1_000_000_000, description: 'Leading DEX. AMM pioneer.', listingYear: 2020, listingMonth: 9 },
+  { name: 'NEAR PROTOCOL', ticker: 'NEAR', sector: 'Technology', basePrice: 0.50, volatility: 45.0, peRatio: 0, dividendYield: 0, founded: 2020, ceo: 'Illia Polosukhin', headquarters: 'San Francisco, CA', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 1_000_000_000, description: 'User-friendly blockchain. Sharding.', listingYear: 2020, listingMonth: 10 },
+  { name: 'FILECOIN', ticker: 'FIL', sector: 'Technology', basePrice: 20.00, volatility: 45.0, peRatio: 0, dividendYield: 0, founded: 2020, ceo: 'Juan Benet', headquarters: 'San Francisco, CA', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 1_960_000_000, description: 'Decentralized storage. IPFS.', listingYear: 2020, listingMonth: 10 },
+  
+  // 2021
+  { name: 'SHIBA INU', ticker: 'SHIB', sector: 'Technology', basePrice: 0.000000001, volatility: 70.0, peRatio: 0, dividendYield: 0, founded: 2020, ceo: 'Ryoshi', headquarters: 'Decentralized', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 589_735_030_408_323, description: 'Dogecoin killer. Meme coin mania!', listingYear: 2021, listingMonth: 8 },
+  { name: 'IMMUTABLE X', ticker: 'IMX', sector: 'Technology', basePrice: 0.50, volatility: 50.0, peRatio: 0, dividendYield: 0, founded: 2021, ceo: 'Robbie Ferguson', headquarters: 'Sydney, Australia', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 2_000_000_000, description: 'Gaming blockchain. NFT layer 2.', listingYear: 2021, listingMonth: 11 },
+  
+  // 2022
+  { name: 'APTOS', ticker: 'APT', sector: 'Technology', basePrice: 8.00, volatility: 50.0, peRatio: 0, dividendYield: 0, founded: 2022, ceo: 'Mo Shaikh', headquarters: 'Palo Alto, CA', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 1_000_000_000, description: 'Move language blockchain. Ex-Meta team.', listingYear: 2022, listingMonth: 10 },
+  { name: 'OPTIMISM', ticker: 'OP', sector: 'Technology', basePrice: 0.90, volatility: 48.0, peRatio: 0, dividendYield: 0, founded: 2021, ceo: 'Jing Wang', headquarters: 'Remote', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 4_294_967_296, description: 'Ethereum Layer 2. OP Stack.', listingYear: 2022, listingMonth: 6 },
+  
+  // 2023
+  { name: 'ARBITRUM', ticker: 'ARB', sector: 'Technology', basePrice: 1.20, volatility: 48.0, peRatio: 0, dividendYield: 0, founded: 2021, ceo: 'Steven Goldfeder', headquarters: 'New York, NY', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 10_000_000_000, description: 'Ethereum Layer 2. Leading TVL.', listingYear: 2023, listingMonth: 3 },
+  { name: 'PEPE', ticker: 'PEPE', sector: 'Technology', basePrice: 0.0000001, volatility: 80.0, peRatio: 0, dividendYield: 0, founded: 2023, ceo: 'Anonymous', headquarters: 'Decentralized', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 420_690_000_000_000, description: 'Meme coin sensation. Frog-themed.', listingYear: 2023, listingMonth: 4 },
+  { name: 'SUI', ticker: 'SUI', sector: 'Technology', basePrice: 1.30, volatility: 55.0, peRatio: 0, dividendYield: 0, founded: 2023, ceo: 'Evan Cheng', headquarters: 'Palo Alto, CA', employees: 0, revenue: 0, profit: 0, cash: 0, debt: 0, sharesOutstanding: 10_000_000_000, description: 'Move language L1. Ex-Meta Diem team.', listingYear: 2023, listingMonth: 5 },
+]
+
+export function generateModernCompanies(startYear: number = 2010): Company[] {
+  return MODERN_COMPANY_TEMPLATES.map((template, index) => {
+    const priceVariation = 0.95 + Math.random() * 0.1
+    const stockPrice = Number((template.basePrice * priceVariation).toFixed(2))
+    const sharesOutstandingActual = template.sharesOutstanding * 1_000_000
+    // Check if already listed at game start
+    const isListed = template.listingYear < startYear || 
+      (template.listingYear === startYear && template.listingMonth <= 1)
+    
+    return {
+      id: `company-${index + 1}`,
+      name: template.name,
+      ticker: template.ticker,
+      sector: template.sector,
+      stockPrice: isListed ? stockPrice : 0,
+      previousPrice: isListed ? stockPrice : 0,
+      sharesOutstanding: sharesOutstandingActual,
+      marketCap: isListed ? stockPrice * sharesOutstandingActual : 0,
+      peRatio: template.peRatio + (Math.random() - 0.5) * 2,
+      dividendYield: template.dividendYield,
+      debt: template.debt * 1_000_000,
+      cash: template.cash * 1_000_000,
+      revenue: template.revenue * 1_000_000,
+      profit: template.profit * 1_000_000,
+      employees: template.employees * 1000,
+      founded: template.founded,
+      ceo: template.ceo,
+      isPublic: true,
+      isListed,
+      listingDate: { year: template.listingYear, month: template.listingMonth },
+      ipoPrice: stockPrice, // Store the IPO price even for unlisted companies
+      isPennytStock: stockPrice < 5,
+      volatility: template.volatility,
+      news: [],
+      ownedBy: null,
+      ownershipPercentage: 0,
+      description: template.description,
+      headquarters: template.headquarters,
+      priceHistory: [],
+      tradeMarkers: []
+    }
+  })
+}
+
+export function generateCryptoAssets(startYear: number = 2009): Company[] {
+  return CRYPTO_TEMPLATES.map((template, index) => {
+    const priceVariation = 0.8 + Math.random() * 0.4 // More variation for crypto
+    const launchPrice = Number((template.basePrice * priceVariation).toFixed(8))
+    // Check if already listed at game start
+    const isListed = template.listingYear < startYear || 
+      (template.listingYear === startYear && template.listingMonth <= 1)
+    
+    return {
+      id: `crypto-${index + 1}`,
+      name: template.name,
+      ticker: template.ticker,
+      sector: template.sector,
+      stockPrice: isListed ? launchPrice : 0,
+      previousPrice: isListed ? launchPrice : 0,
+      sharesOutstanding: template.sharesOutstanding,
+      marketCap: isListed ? launchPrice * template.sharesOutstanding : 0,
+      peRatio: 0,
+      dividendYield: 0,
+      debt: 0,
+      cash: 0,
+      revenue: 0,
+      profit: 0,
+      employees: 0,
+      founded: template.founded,
+      ceo: template.ceo,
+      isPublic: true,
+      isListed,
+      listingDate: { year: template.listingYear, month: template.listingMonth },
+      ipoPrice: launchPrice, // Store the launch price even for unlisted crypto
+      isPennytStock: launchPrice < 1,
+      volatility: template.volatility,
+      news: [],
+      ownedBy: null,
+      ownershipPercentage: 0,
+      description: template.description,
+      headquarters: template.headquarters,
+      priceHistory: [],
+      tradeMarkers: []
+    }
+  })
+}
+
+// Export templates for reference
+export { COMPANY_TEMPLATES, MODERN_COMPANY_TEMPLATES, CRYPTO_TEMPLATES }
