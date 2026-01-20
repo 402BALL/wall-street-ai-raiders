@@ -28,10 +28,9 @@ export function useSocket() {
     const socket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
       reconnection: true,
-      reconnectionAttempts: Infinity, // Keep trying forever
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      timeout: 20000
+      reconnectionAttempts: 5,
+      reconnectionDelay: 2000,
+      timeout: 30000
     })
     
     globalSocket = socket
@@ -41,9 +40,8 @@ export function useSocket() {
       console.log('[Socket] Connected:', socket.id)
       useGameStore.getState().setConnected(true)
       
-      // Auto-rejoin game if we were watching one
+      // Rejoin game if we were watching one
       if (currentGameMode) {
-        console.log('[Socket] Auto-rejoining game:', currentGameMode)
         socket.emit('joinGame', currentGameMode)
       }
     })
@@ -51,46 +49,19 @@ export function useSocket() {
     socket.on('disconnect', (reason) => {
       console.log('[Socket] Disconnected:', reason)
       useGameStore.getState().setConnected(false)
-      
-      // If server disconnected us, try to reconnect
-      if (reason === 'io server disconnect') {
-        socket.connect()
-      }
     })
 
     socket.on('connect_error', (error) => {
       console.error('[Socket] Connection error:', error.message)
-      useGameStore.getState().setConnected(false)
     })
 
-    socket.on('reconnect', (attemptNumber) => {
-      console.log('[Socket] Reconnected after', attemptNumber, 'attempts')
-      useGameStore.getState().setConnected(true)
-      
-      // Rejoin game on reconnect
-      if (currentGameMode) {
-        console.log('[Socket] Rejoining game after reconnect:', currentGameMode)
-        socket.emit('joinGame', currentGameMode)
-      }
-    })
-
-    socket.on('reconnect_attempt', (attemptNumber) => {
-      console.log('[Socket] Reconnection attempt:', attemptNumber)
-    })
-
-    socket.on('reconnect_error', (error) => {
-      console.error('[Socket] Reconnection error:', error.message)
-    })
-
-    // Games overview (all 3 games status)
+    // Games overview
     socket.on('gamesOverview', (overview) => {
-      console.log('[Socket] Games overview received')
       useGameStore.getState().setGamesOverview(overview)
     })
 
     // Game state updates
     socket.on('gameState', ({ mode, state }) => {
-      console.log('[Socket] Game state update:', mode, 'Turn:', state?.turnNumber)
       if (state) {
         useGameStore.getState().setServerState(state)
       }
@@ -110,45 +81,38 @@ export function useSocket() {
       }
     })
 
-    // Ping to keep connection alive
-    const pingInterval = setInterval(() => {
-      if (socket.connected) {
-        socket.emit('ping')
-      }
-    }, 30000)
+    // Pong response
+    socket.on('pong', () => {
+      // Connection is alive
+    })
 
     return () => {
-      clearInterval(pingInterval)
-      // Don't disconnect - keep socket alive
+      // Don't disconnect on unmount
     }
   }, [])
 
   // Join a specific game to watch
   const joinGame = useCallback((mode: GameMode) => {
-    currentGameMode = mode // Remember which game we're watching
+    currentGameMode = mode
     const socket = globalSocket || socketRef.current
-    if (socket && socket.connected) {
-      console.log('[Socket] Joining game:', mode)
+    if (socket?.connected) {
       socket.emit('joinGame', mode)
-    } else {
-      console.log('[Socket] Not connected, will join on reconnect:', mode)
     }
   }, [])
 
-  // Leave current game (back to desktop)
+  // Leave current game
   const leaveGame = useCallback(() => {
-    currentGameMode = null // Clear remembered game
+    currentGameMode = null
     const socket = globalSocket || socketRef.current
-    if (socket && socket.connected) {
-      console.log('[Socket] Leaving game')
+    if (socket?.connected) {
       socket.emit('leaveGame')
     }
   }, [])
 
-  // Request state of specific game
+  // Request state
   const requestState = useCallback((mode: GameMode) => {
     const socket = globalSocket || socketRef.current
-    if (socket && socket.connected) {
+    if (socket?.connected) {
       socket.emit('requestState', mode)
     }
   }, [])

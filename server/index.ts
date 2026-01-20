@@ -13,9 +13,15 @@ const app = express()
 const httpServer = createServer(app)
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' ? false : ['http://localhost:5173'],
+    origin: '*', // Allow all origins
     methods: ['GET', 'POST']
-  }
+  },
+  // Increase timeouts to prevent disconnects
+  pingTimeout: 60000,      // 60 seconds before considering connection dead
+  pingInterval: 25000,     // Ping every 25 seconds
+  connectTimeout: 45000,   // Connection timeout
+  transports: ['websocket', 'polling'],
+  allowUpgrades: true
 })
 
 const PORT = process.env.PORT || 3001

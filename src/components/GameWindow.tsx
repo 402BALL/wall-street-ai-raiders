@@ -19,20 +19,6 @@ export default function GameWindow({ onClose }: GameWindowProps) {
   const [hasError, setHasError] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   
-  // Connection check - show reconnecting overlay if not connected (but don't hide the game)
-  const reconnectingOverlay = !isConnected ? (
-    <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(0,0,0,0.5)' }}>
-      <div className="win95-window p-0" style={{ width: 280 }}>
-        <div className="win95-titlebar">
-          <span className="text-xs font-bold">Connection Lost</span>
-        </div>
-        <div className="bg-[#c0c0c0] p-4 text-center text-black">
-          <div className="text-sm mb-2">Reconnecting to server...</div>
-          <div className="animate-pulse text-xs">Please wait</div>
-        </div>
-      </div>
-    </div>
-  ) : null
   
   // Loading check - show loading if no data yet
   if (!companies || companies.length === 0 || !players || players.length === 0) {
@@ -225,9 +211,6 @@ export default function GameWindow({ onClose }: GameWindowProps) {
       
       {/* Breaking News Popup */}
       <BreakingNewsPopup />
-      
-      {/* Reconnecting Overlay */}
-      {reconnectingOverlay}
     </div>
   )
 }
