@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore'
 import { Sector, Company, GameDate } from '../../types'
 import CompanyDetailWindow from './CompanyDetailWindow'
+import ErrorBoundary from '../ErrorBoundary'
 
 type SortField = 'ticker' | 'price' | 'change' | 'marketCap' | 'pe' | 'div' | 'status'
 type ViewMode = 'list' | 'heatmap' | 'sectors'
@@ -240,10 +241,25 @@ export default function MarketPanel() {
       
       {/* Company Detail Window */}
       {selectedCompany && (
-        <CompanyDetailWindow 
-          company={selectedCompany} 
-          onClose={() => setSelectedCompany(null)} 
-        />
+        <ErrorBoundary fallback={
+          <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(0,0,0,0.5)' }}>
+            <div className="win95-window p-0" style={{ width: 300 }}>
+              <div className="win95-titlebar">
+                <span className="text-xs font-bold">Error</span>
+                <button className="win95-titlebar-btn close" onClick={() => setSelectedCompany(null)}>×</button>
+              </div>
+              <div className="bg-[#c0c0c0] p-4 text-center text-black">
+                <div className="text-sm mb-2">Error loading company data</div>
+                <button className="win95-btn px-4 py-1 text-xs" onClick={() => setSelectedCompany(null)}>Close</button>
+              </div>
+            </div>
+          </div>
+        }>
+          <CompanyDetailWindow 
+            company={selectedCompany} 
+            onClose={() => setSelectedCompany(null)} 
+          />
+        </ErrorBoundary>
       )}
     </>
   )

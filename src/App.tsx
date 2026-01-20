@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Desktop from './components/Desktop'
 import GameWindow from './components/GameWindow'
 import GameModeMenu, { GameMode } from './components/game/GameModeMenu'
+import ErrorBoundary from './components/ErrorBoundary'
 import { useGameStore } from './store/gameStore'
 import { useSocket } from './hooks/useSocket'
 
@@ -67,7 +68,9 @@ function App() {
   return (
     <div className="h-screen w-screen overflow-hidden">
       {watchingGame ? (
-        <GameWindow onClose={handleCloseGame} />
+        <ErrorBoundary>
+          <GameWindow onClose={handleCloseGame} />
+        </ErrorBoundary>
       ) : showModeMenu ? (
         <GameModeMenu onSelectMode={handleSelectMode} onClose={handleCloseMenu} />
       ) : (
