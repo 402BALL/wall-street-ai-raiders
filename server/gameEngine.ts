@@ -519,43 +519,216 @@ export class GameEngine extends EventEmitter {
   }
 
   private generateNews() {
-    const newsTemplates = [
-      { headline: 'Markets show mixed signals amid economic uncertainty', category: 'market', impact: 'neutral' as const },
-      { headline: 'Federal Reserve considers policy adjustment', category: 'economy', impact: 'neutral' as const },
-      { headline: 'Tech sector leads market rally', category: 'market', impact: 'positive' as const },
-      { headline: 'Energy prices surge on supply concerns', category: 'economy', impact: 'negative' as const },
-      { headline: 'Consumer confidence reaches new highs', category: 'economy', impact: 'positive' as const },
-      { headline: 'Global trade tensions ease', category: 'politics', impact: 'positive' as const },
-      { headline: 'Inflation data sparks market volatility', category: 'economy', impact: 'negative' as const },
-    ]
-
-    // Random chance of news
-    if (Math.random() < 0.7) {
-      const template = newsTemplates[Math.floor(Math.random() * newsTemplates.length)]
+    const { year, month } = this.state.currentDate
+    const mode = this.state.gameMode
+    
+    // Check for historical events
+    const historicalEvent = this.getHistoricalEvent(year, month, mode)
+    if (historicalEvent) {
       const news: NewsHeadline = {
-        id: `news-${Date.now()}`,
-        headline: template.headline,
-        description: 'Market analysts are closely watching developments...',
+        id: `news-${Date.now()}-hist`,
+        headline: historicalEvent.headline,
+        description: historicalEvent.description,
         date: { ...this.state.currentDate },
-        category: template.category,
-        impact: template.impact,
-        isCritical: Math.random() < 0.1
+        category: historicalEvent.category,
+        impact: historicalEvent.impact,
+        isCritical: historicalEvent.isCritical || false
       }
-
+      
       this.state.news = [news, ...this.state.news.slice(0, 49)]
       this.emit('newsUpdate', news)
-
-      if (news.isCritical) {
+      
+      // Apply market impact
+      if (historicalEvent.marketImpact) {
+        this.applyMarketImpact(historicalEvent.marketImpact, historicalEvent.sectors)
+      }
+      
+      if (historicalEvent.isCritical) {
         this.state.breakingNews = news
         this.emit('breakingNews', news)
-        
-        // Clear breaking news after 5 seconds
         setTimeout(() => {
           this.state.breakingNews = null
           this.emit('stateUpdate', this.getState())
-        }, 5000)
+        }, 8000)
+      }
+      return
+    }
+    
+    // Random background news
+    const bgNews = this.getRandomBackgroundNews()
+    if (Math.random() < 0.6) {
+      const news: NewsHeadline = {
+        id: `news-${Date.now()}`,
+        headline: bgNews.headline,
+        description: bgNews.description,
+        date: { ...this.state.currentDate },
+        category: bgNews.category,
+        impact: bgNews.impact,
+        isCritical: false
+      }
+      this.state.news = [news, ...this.state.news.slice(0, 49)]
+      this.emit('newsUpdate', news)
+    }
+  }
+  
+  private getHistoricalEvent(year: number, month: number, mode: GameMode) {
+    // CLASSIC MODE EVENTS (1985-2010)
+    const classicEvents: Record<string, any> = {
+      '1987-10': { headline: '⚠️ BLACK MONDAY: DOW CRASHES 22.6%', description: 'October 19, 1987 - The largest single-day percentage decline in stock market history. Panic selling triggers circuit breakers worldwide.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.22, sectors: ['all'] },
+      '1987-11': { headline: 'Markets stabilize after Black Monday crash', description: 'Federal Reserve injects liquidity to prevent systemic collapse.', category: 'economy', impact: 'neutral' as const, marketImpact: 0.05 },
+      '1989-10': { headline: 'Friday the 13th mini-crash hits markets', description: 'Failed UAL leveraged buyout triggers selloff, Dow drops 6.9%.', category: 'market', impact: 'negative' as const, marketImpact: -0.07 },
+      '1990-8': { headline: '⚠️ IRAQ INVADES KUWAIT - Oil prices surge', description: 'Gulf War begins. Oil prices double from $17 to $35 per barrel.', category: 'politics', impact: 'negative' as const, isCritical: true, marketImpact: -0.08, sectors: ['Energy'] },
+      '1991-1': { headline: 'Operation Desert Storm begins', description: 'US-led coalition launches air campaign against Iraq.', category: 'politics', impact: 'negative' as const, marketImpact: -0.03 },
+      '1991-2': { headline: 'Gulf War ends - Markets rally', description: 'Quick victory boosts investor confidence.', category: 'politics', impact: 'positive' as const, marketImpact: 0.06 },
+      '1994-2': { headline: 'Fed raises rates unexpectedly', description: 'Bond market massacre begins. Worst bond market year since 1927.', category: 'economy', impact: 'negative' as const, marketImpact: -0.04 },
+      '1995-1': { headline: 'Mexican Peso Crisis erupts', description: 'US provides $50B bailout package to prevent default.', category: 'economy', impact: 'negative' as const, marketImpact: -0.03 },
+      '1995-8': { headline: 'Netscape IPO ignites dot-com boom', description: 'Browser company surges 108% on first day. Internet mania begins.', category: 'market', impact: 'positive' as const, marketImpact: 0.03, sectors: ['Technology'] },
+      '1997-7': { headline: '⚠️ ASIAN FINANCIAL CRISIS BEGINS', description: 'Thai baht collapses. Currency crisis spreads to South Korea, Indonesia.', category: 'economy', impact: 'negative' as const, isCritical: true, marketImpact: -0.06 },
+      '1998-8': { headline: '⚠️ RUSSIA DEFAULTS - LTCM COLLAPSE', description: 'Russia defaults on debt. Long-Term Capital Management near collapse threatens global markets.', category: 'economy', impact: 'negative' as const, isCritical: true, marketImpact: -0.12 },
+      '1998-10': { headline: 'Fed orchestrates LTCM bailout', description: 'Major banks rescue hedge fund to prevent systemic crisis.', category: 'economy', impact: 'positive' as const, marketImpact: 0.08 },
+      '1999-1': { headline: 'Euro currency launched', description: '11 European nations adopt single currency.', category: 'economy', impact: 'neutral' as const },
+      '1999-3': { headline: 'Dow crosses 10,000 for first time', description: 'Historic milestone reached amid dot-com euphoria.', category: 'market', impact: 'positive' as const, marketImpact: 0.02 },
+      '2000-3': { headline: '⚠️ DOT-COM BUBBLE PEAKS', description: 'NASDAQ hits all-time high of 5,048. Tech valuations reach extreme levels.', category: 'market', impact: 'neutral' as const, isCritical: true, sectors: ['Technology'] },
+      '2000-4': { headline: '⚠️ DOT-COM CRASH BEGINS', description: 'NASDAQ plunges 25% in April. Dot-com companies begin collapsing.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.15, sectors: ['Technology'] },
+      '2000-11': { headline: 'Contested US election creates uncertainty', description: 'Bush vs Gore recount drama rattles markets.', category: 'politics', impact: 'negative' as const, marketImpact: -0.03 },
+      '2001-1': { headline: 'Fed begins emergency rate cuts', description: 'Greenspan slashes rates to combat recession fears.', category: 'economy', impact: 'positive' as const, marketImpact: 0.02 },
+      '2001-3': { headline: 'Tech wreck continues - layoffs mount', description: 'Dot-com companies fold as funding dries up.', category: 'market', impact: 'negative' as const, marketImpact: -0.05, sectors: ['Technology'] },
+      '2001-9': { headline: '⚠️ 9/11 ATTACKS - MARKETS CLOSED', description: 'September 11, 2001 - Terror attacks on World Trade Center. NYSE closed for 4 days.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.12 },
+      '2001-10': { headline: 'Markets reopen - volatility extreme', description: 'Dow drops 14% in first week after reopening.', category: 'market', impact: 'negative' as const, marketImpact: -0.06 },
+      '2001-12': { headline: '⚠️ ENRON FILES BANKRUPTCY', description: 'Energy giant collapses in massive accounting fraud scandal.', category: 'company', impact: 'negative' as const, isCritical: true, marketImpact: -0.03 },
+      '2002-7': { headline: '⚠️ WORLDCOM FRAUD REVEALED', description: '$11 billion accounting fraud - largest bankruptcy in US history.', category: 'company', impact: 'negative' as const, isCritical: true, marketImpact: -0.05 },
+      '2002-10': { headline: 'Bear market bottom reached', description: 'S&P 500 down 49% from peak. Worst bear market since 1930s.', category: 'market', impact: 'neutral' as const },
+      '2003-3': { headline: 'Iraq War begins - markets rally', description: 'US invades Iraq. Markets rise on resolution of uncertainty.', category: 'politics', impact: 'positive' as const, marketImpact: 0.05 },
+      '2004-8': { headline: 'Google IPO at $85 per share', description: 'Search giant goes public, valued at $27 billion.', category: 'company', impact: 'positive' as const, sectors: ['Technology'] },
+      '2005-8': { headline: 'Hurricane Katrina devastates Gulf Coast', description: 'Oil production disrupted. Gas prices spike.', category: 'economy', impact: 'negative' as const, marketImpact: -0.02, sectors: ['Energy'] },
+      '2006-6': { headline: 'Housing prices begin to decline', description: 'First signs of subprime mortgage troubles emerge.', category: 'economy', impact: 'negative' as const },
+      '2007-2': { headline: 'HSBC warns of subprime losses', description: 'First major bank acknowledges mortgage problems.', category: 'economy', impact: 'negative' as const, marketImpact: -0.02 },
+      '2007-8': { headline: '⚠️ CREDIT CRISIS BEGINS', description: 'BNP Paribas freezes funds. Interbank lending seizes up.', category: 'economy', impact: 'negative' as const, isCritical: true, marketImpact: -0.05 },
+      '2008-3': { headline: '⚠️ BEAR STEARNS COLLAPSES', description: 'JPMorgan acquires Bear Stearns for $2/share in Fed-backed rescue.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.08, sectors: ['Financial'] },
+      '2008-9': { headline: '⚠️ LEHMAN BROTHERS BANKRUPTCY', description: 'September 15 - Lehman files largest bankruptcy in history. Global financial system freezes.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.20, sectors: ['Financial'] },
+      '2008-10': { headline: '⚠️ TARP BAILOUT - $700B RESCUE', description: 'Congress approves massive bank bailout after initial failure.', category: 'economy', impact: 'positive' as const, isCritical: true, marketImpact: 0.08 },
+      '2008-11': { headline: 'Fed cuts rates to near zero', description: 'Emergency monetary policy as economy craters.', category: 'economy', impact: 'positive' as const, marketImpact: 0.03 },
+      '2009-3': { headline: 'Market hits 12-year low', description: 'S&P 500 bottoms at 676. Down 57% from 2007 peak.', category: 'market', impact: 'neutral' as const },
+      '2009-4': { headline: 'Recovery begins - banks pass stress tests', description: 'Confidence returns as financial system stabilizes.', category: 'economy', impact: 'positive' as const, marketImpact: 0.08 },
+    }
+    
+    // MODERN MODE EVENTS (2010-2026)  
+    const modernEvents: Record<string, any> = {
+      '2010-5': { headline: '⚠️ FLASH CRASH - DOW DROPS 1000 POINTS', description: 'May 6 - Markets plunge 9% in minutes before recovering. Algorithmic trading blamed.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.06 },
+      '2011-8': { headline: '⚠️ US CREDIT DOWNGRADE - S&P CUTS AAA', description: 'First ever downgrade of US sovereign debt. Markets tumble.', category: 'economy', impact: 'negative' as const, isCritical: true, marketImpact: -0.08 },
+      '2011-10': { headline: 'European debt crisis intensifies', description: 'Greek default fears spread to Italy, Spain.', category: 'economy', impact: 'negative' as const, marketImpact: -0.05 },
+      '2012-5': { headline: 'Facebook IPO flops', description: 'Social network IPOs at $38, falls to $19 within months.', category: 'company', impact: 'negative' as const, sectors: ['Technology'] },
+      '2012-9': { headline: 'Fed launches QE3 - unlimited bond buying', description: 'Draghi says ECB will do "whatever it takes".', category: 'economy', impact: 'positive' as const, marketImpact: 0.05 },
+      '2013-5': { headline: 'Taper Tantrum hits markets', description: 'Bernanke hints at reducing QE. Bond yields spike.', category: 'economy', impact: 'negative' as const, marketImpact: -0.04 },
+      '2014-10': { headline: 'Oil prices crash begins', description: 'OPEC refuses to cut production. Oil falls from $100 to $50.', category: 'economy', impact: 'negative' as const, marketImpact: -0.03, sectors: ['Energy'] },
+      '2015-8': { headline: '⚠️ CHINA DEVALUES YUAN - GLOBAL SELLOFF', description: 'Black Monday - Dow drops 1000 points at open on China fears.', category: 'economy', impact: 'negative' as const, isCritical: true, marketImpact: -0.08 },
+      '2016-6': { headline: '⚠️ BREXIT SHOCK - UK VOTES TO LEAVE EU', description: 'Markets crash on unexpected referendum result.', category: 'politics', impact: 'negative' as const, isCritical: true, marketImpact: -0.05 },
+      '2016-11': { headline: 'Trump wins election - markets rally', description: 'Surprise victory followed by massive stock rally.', category: 'politics', impact: 'positive' as const, marketImpact: 0.06 },
+      '2018-2': { headline: '⚠️ VOLMAGEDDON - VIX SPIKES 115%', description: 'Volatility spike wipes out short-vol products.', category: 'market', impact: 'negative' as const, isCritical: true, marketImpact: -0.08 },
+      '2018-12': { headline: 'Fed hikes into weakness - markets tumble', description: 'Worst December since Great Depression.', category: 'economy', impact: 'negative' as const, marketImpact: -0.09 },
+      '2019-8': { headline: 'Yield curve inverts - recession fears', description: '10Y-2Y spread goes negative for first time since 2007.', category: 'economy', impact: 'negative' as const, marketImpact: -0.03 },
+      '2020-2': { headline: '⚠️ COVID-19 PANDEMIC BEGINS', description: 'Coronavirus spreads globally. Markets begin historic crash.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.12 },
+      '2020-3': { headline: '⚠️ FASTEST BEAR MARKET IN HISTORY', description: 'S&P 500 down 34% in 23 trading days. Circuit breakers triggered 4 times.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.20 },
+      '2020-4': { headline: 'Fed unleashes unlimited QE', description: 'Powell promises to do "whatever it takes". Markets bottom.', category: 'economy', impact: 'positive' as const, marketImpact: 0.15 },
+      '2020-11': { headline: 'Pfizer vaccine 95% effective', description: 'Markets surge on vaccine breakthrough.', category: 'economy', impact: 'positive' as const, marketImpact: 0.08 },
+      '2021-1': { headline: '⚠️ GAMESTOP MEME STOCK MANIA', description: 'Reddit army sends GME from $20 to $483. Robinhood halts trading.', category: 'market', impact: 'positive' as const, isCritical: true, sectors: ['Retail'] },
+      '2021-4': { headline: 'Coinbase goes public at $380', description: 'Crypto exchange valued at $100 billion.', category: 'company', impact: 'positive' as const, sectors: ['Fintech'] },
+      '2021-11': { headline: 'Inflation surges to 6.8%', description: 'Highest inflation in 40 years. Fed calls it "transitory".', category: 'economy', impact: 'negative' as const },
+      '2022-1': { headline: 'Fed signals aggressive rate hikes', description: 'Growth stocks crash as rates expected to rise.', category: 'economy', impact: 'negative' as const, marketImpact: -0.08, sectors: ['Technology'] },
+      '2022-5': { headline: '⚠️ LUNA/TERRA CRYPTO COLLAPSE', description: '$60 billion algorithmic stablecoin implodes in days.', category: 'crash', impact: 'negative' as const, isCritical: true },
+      '2022-11': { headline: '⚠️ FTX COLLAPSES - BANKMAN-FRIED ARRESTED', description: '$32 billion crypto exchange fails in spectacular fraud.', category: 'crash', impact: 'negative' as const, isCritical: true },
+      '2023-3': { headline: '⚠️ SILICON VALLEY BANK COLLAPSES', description: 'Largest bank failure since 2008. Regional banks under pressure.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.05, sectors: ['Financial'] },
+      '2023-5': { headline: 'AI boom - Nvidia surges 200%+', description: 'ChatGPT sparks AI investment frenzy.', category: 'market', impact: 'positive' as const, marketImpact: 0.06, sectors: ['Technology'] },
+      '2024-1': { headline: '⚠️ BITCOIN ETF APPROVED', description: 'SEC approves spot Bitcoin ETFs. Crypto enters mainstream.', category: 'economy', impact: 'positive' as const, isCritical: true },
+      '2024-7': { headline: 'Fed signals rate cuts ahead', description: 'Inflation cooling allows pivot to easing.', category: 'economy', impact: 'positive' as const, marketImpact: 0.04 },
+      '2025-1': { headline: 'AI Agents reshape industries', description: 'Autonomous AI systems begin replacing human workflows.', category: 'market', impact: 'positive' as const, sectors: ['Technology'] },
+    }
+    
+    // CRYPTO MODE EVENTS (2009-2026)
+    const cryptoEvents: Record<string, any> = {
+      '2009-1': { headline: 'Bitcoin genesis block mined', description: 'Satoshi Nakamoto mines first Bitcoin block with message about bank bailouts.', category: 'crypto', impact: 'positive' as const },
+      '2010-5': { headline: 'First Bitcoin purchase - 10,000 BTC for pizza', description: 'Laszlo Hanyecz pays 10,000 BTC for two pizzas (~$41).', category: 'crypto', impact: 'neutral' as const },
+      '2010-7': { headline: 'Bitcoin reaches $0.08', description: 'Early adopters begin trading on Mt. Gox exchange.', category: 'crypto', impact: 'positive' as const, marketImpact: 0.15 },
+      '2011-6': { headline: '⚠️ MT. GOX HACKED - BTC CRASHES 99%', description: 'Exchange compromised, price falls from $17 to $0.01 briefly.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.50 },
+      '2013-3': { headline: 'Cyprus crisis - Bitcoin surges', description: 'Bank deposit seizures drive interest in Bitcoin as safe haven.', category: 'economy', impact: 'positive' as const, marketImpact: 0.20 },
+      '2013-11': { headline: '⚠️ BITCOIN HITS $1,000', description: 'Unprecedented rally as mainstream media coverage increases.', category: 'market', impact: 'positive' as const, isCritical: true, marketImpact: 0.30 },
+      '2014-2': { headline: '⚠️ MT. GOX COLLAPSES - 850K BTC LOST', description: 'Largest Bitcoin exchange files bankruptcy after massive hack.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.40 },
+      '2015-8': { headline: 'Ethereum launches', description: 'Smart contract platform goes live with Vitalik Buterin vision.', category: 'crypto', impact: 'positive' as const },
+      '2016-7': { headline: '⚠️ THE DAO HACK - $50M STOLEN', description: 'Ethereum hard forks to recover funds, creating Ethereum Classic.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.20 },
+      '2017-1': { headline: 'Bitcoin breaks $1,000 again', description: 'Crypto winter ends. New bull market begins.', category: 'market', impact: 'positive' as const, marketImpact: 0.15 },
+      '2017-6': { headline: 'ICO mania peaks - billions raised', description: 'Token sales raise $5.6 billion in H1 2017.', category: 'market', impact: 'positive' as const, marketImpact: 0.25 },
+      '2017-12': { headline: '⚠️ BITCOIN HITS $20,000', description: 'Historic all-time high amid retail FOMO. Coinbase app #1 in App Store.', category: 'market', impact: 'positive' as const, isCritical: true, marketImpact: 0.40 },
+      '2018-1': { headline: '⚠️ CRYPTO CRASH BEGINS', description: 'Bitcoin drops 65% from peak. Altcoins crash 80-90%.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.50 },
+      '2018-11': { headline: 'Crypto winter deepens', description: 'Bitcoin falls below $4,000. Total market cap down 85% from peak.', category: 'market', impact: 'negative' as const, marketImpact: -0.30 },
+      '2020-3': { headline: '⚠️ COVID CRASH - BTC DROPS 50%', description: 'Black Thursday - crypto crashes with traditional markets.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.40 },
+      '2020-5': { headline: 'Bitcoin halving completes', description: 'Block reward drops to 6.25 BTC. Supply shock begins.', category: 'crypto', impact: 'positive' as const, marketImpact: 0.10 },
+      '2020-8': { headline: 'DeFi Summer - yields explode', description: 'Liquidity mining launches DeFi into mainstream.', category: 'crypto', impact: 'positive' as const, marketImpact: 0.25 },
+      '2020-12': { headline: 'Bitcoin breaks 2017 all-time high', description: 'Institutional buying from MicroStrategy, Square drives rally.', category: 'market', impact: 'positive' as const, marketImpact: 0.20 },
+      '2021-2': { headline: 'Tesla buys $1.5 billion in Bitcoin', description: 'Elon Musk drives Bitcoin to $58,000.', category: 'company', impact: 'positive' as const, marketImpact: 0.30 },
+      '2021-4': { headline: 'Coinbase IPO at $328 - $86B valuation', description: 'Crypto exchange goes public on NASDAQ.', category: 'company', impact: 'positive' as const },
+      '2021-5': { headline: '⚠️ CHINA BANS CRYPTO MINING', description: 'Bitcoin crashes 50% as miners flee China.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.35 },
+      '2021-11': { headline: '⚠️ BITCOIN HITS $69,000 ATH', description: 'All-time high before market reversal.', category: 'market', impact: 'positive' as const, isCritical: true, marketImpact: 0.25 },
+      '2022-5': { headline: '⚠️ LUNA/TERRA DEATH SPIRAL', description: '$60B algorithmic stablecoin collapses to zero in days. Contagion spreads.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.40 },
+      '2022-6': { headline: 'Celsius, 3AC, Voyager collapse', description: 'Crypto lenders fail as contagion spreads.', category: 'crash', impact: 'negative' as const, marketImpact: -0.25 },
+      '2022-11': { headline: '⚠️ FTX EMPIRE COLLAPSES', description: 'Sam Bankman-Fried\'s $32B exchange implodes. Billions in customer funds missing.', category: 'crash', impact: 'negative' as const, isCritical: true, marketImpact: -0.30 },
+      '2023-1': { headline: 'Bitcoin bottoms at $16,000', description: 'Crypto winter appears to end as sellers exhausted.', category: 'market', impact: 'neutral' as const },
+      '2023-6': { headline: 'BlackRock files for Bitcoin ETF', description: 'Largest asset manager enters crypto. Markets surge.', category: 'company', impact: 'positive' as const, marketImpact: 0.20 },
+      '2024-1': { headline: '⚠️ BITCOIN ETF APPROVED', description: 'SEC approves 11 spot Bitcoin ETFs. Historic moment for crypto.', category: 'economy', impact: 'positive' as const, isCritical: true, marketImpact: 0.25 },
+      '2024-3': { headline: 'Bitcoin hits new ATH above $70,000', description: 'ETF inflows drive price past 2021 highs.', category: 'market', impact: 'positive' as const, marketImpact: 0.15 },
+      '2024-4': { headline: 'Bitcoin halving - supply drops again', description: 'Block reward falls to 3.125 BTC.', category: 'crypto', impact: 'positive' as const, marketImpact: 0.10 },
+      '2025-1': { headline: 'Ethereum ETF sees record inflows', description: 'Institutional adoption of crypto accelerates.', category: 'market', impact: 'positive' as const, marketImpact: 0.15 },
+    }
+    
+    const key = `${year}-${month}`
+    
+    if (mode === 'classic') return classicEvents[key]
+    if (mode === 'modern') return modernEvents[key]
+    if (mode === 'crypto') return cryptoEvents[key]
+    
+    return null
+  }
+  
+  private applyMarketImpact(impact: number, sectors?: string[]) {
+    if (sectors?.includes('all') || !sectors) {
+      // Apply to all companies
+      for (const company of this.state.companies) {
+        const volatilityFactor = 1 + (Math.random() - 0.5) * 0.3
+        const change = impact * volatilityFactor
+        company.previousPrice = company.stockPrice
+        company.stockPrice = Math.max(0.01, company.stockPrice * (1 + change))
+        company.marketCap = company.stockPrice * 1_000_000_000
+      }
+    } else {
+      // Apply stronger to specific sectors
+      for (const company of this.state.companies) {
+        const inSector = sectors.includes(company.sector)
+        const sectorMultiplier = inSector ? 1.5 : 0.5
+        const volatilityFactor = 1 + (Math.random() - 0.5) * 0.3
+        const change = impact * sectorMultiplier * volatilityFactor
+        company.previousPrice = company.stockPrice
+        company.stockPrice = Math.max(0.01, company.stockPrice * (1 + change))
+        company.marketCap = company.stockPrice * 1_000_000_000
       }
     }
+    
+    // Update market index
+    this.state.marketIndex *= (1 + impact)
+  }
+  
+  private getRandomBackgroundNews() {
+    const templates = [
+      { headline: 'Markets trade sideways amid mixed signals', description: 'Investors await key economic data.', category: 'market', impact: 'neutral' as const },
+      { headline: 'Analysts debate market outlook', description: 'Wall Street divided on near-term direction.', category: 'market', impact: 'neutral' as const },
+      { headline: 'Corporate earnings beat expectations', description: 'Strong quarter for major companies.', category: 'company', impact: 'positive' as const },
+      { headline: 'Consumer spending shows resilience', description: 'Retail sales data exceeds forecasts.', category: 'economy', impact: 'positive' as const },
+      { headline: 'Manufacturing data disappoints', description: 'PMI falls below expectations.', category: 'economy', impact: 'negative' as const },
+      { headline: 'Housing market shows signs of cooling', description: 'Home sales decline for third month.', category: 'economy', impact: 'negative' as const },
+      { headline: 'Oil prices stabilize after volatile week', description: 'Energy markets find equilibrium.', category: 'economy', impact: 'neutral' as const },
+      { headline: 'Tech sector outperforms broader market', description: 'Growth stocks lead gains.', category: 'market', impact: 'positive' as const },
+      { headline: 'Bond yields rise on inflation concerns', description: 'Treasury market under pressure.', category: 'economy', impact: 'negative' as const },
+      { headline: 'Central bank maintains steady policy', description: 'No changes to interest rates expected.', category: 'economy', impact: 'neutral' as const },
+    ]
+    return templates[Math.floor(Math.random() * templates.length)]
   }
 
   private async processAIDecisions() {
