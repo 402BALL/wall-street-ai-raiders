@@ -124,7 +124,7 @@ export default function Desktop({ onLaunchGame }: Props) {
           <DesktopIcon 
             icon={<span className="text-[14px] font-bold">X</span>}
             label="X / Twitter"
-            onClick={() => window.open('https://x.com', '_blank')}
+            onClick={() => window.open('https://x.com/i/communities/2014067411989790887/', '_blank')}
             bgColor="#000000"
             textColor="#ffffff"
           />
@@ -135,7 +135,7 @@ export default function Desktop({ onLaunchGame }: Props) {
           <DesktopIcon 
             icon={<span className="text-[8px]">PUMP</span>}
             label="PumpFun"
-            onClick={() => window.open('https://pump.fun', '_blank')}
+            onClick={() => window.open('https://pump.fun/coin/412bMFkW3xNBECuo7TrX77obJD8dKNurgY3DUeHkpump', '_blank')}
             bgColor="#00d4aa"
             textColor="#000"
           />
